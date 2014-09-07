@@ -1,0 +1,20 @@
+name: RogueCraft
+main: fr.blueslime.roguecraft.RogueCraft
+version: 1.0
+
+softdepends: [MasterBundle, NoteBlockAPI]
+
+author: BlueSlime
+website: http://blueslime.fr
+
+commands:
+    rc:
+        description: Commandes RogueCraft
+        usage: /<command> <help|start>
+        permission: RogueCraft.op
+        permission-message: Permission non accordée
+
+permissions:
+   RogueCraft.op:
+      description: Commandes OP RC
+      default: op
