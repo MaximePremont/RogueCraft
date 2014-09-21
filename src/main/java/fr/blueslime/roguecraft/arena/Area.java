@@ -2,70 +2,50 @@ package fr.blueslime.roguecraft.arena;
 
 import java.util.ArrayList;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
 
 public class Area
-{
-    public static enum AreaType { START, NORMAL, BOSS }
+{    
+    private final ArrayList<Block> areaBlocks;
+    private ArrayList<Location> bonusChestSpawns;
+    private ArrayList<Location> mobSpawns;
+    private Location playersSpawn;
     
-    private final AreaType areaType;
-    private final ArrayList<Location> mobSpawns;
-    private final Location spawnLocation; // If spawn Area
-    private Door entryDoor;
-    private Door exitDoor;
-    
-    public Area(AreaType areaType, Door entryDoor, Door exitDoor, ArrayList<Location> mobSpawns)
+    public Area(ArrayList<Block> areaBlocks)
     {
-        this.areaType = areaType;
-        this.mobSpawns = mobSpawns;
-        this.entryDoor = entryDoor;
-        this.exitDoor = exitDoor;
-        this.spawnLocation = null;
+        this.areaBlocks = areaBlocks;
+        this.bonusChestSpawns = new ArrayList<>();
+        this.mobSpawns = new ArrayList<>();
+        
+        for(Block block : areaBlocks)
+        {
+            if(block.getType() == Material.EMERALD_BLOCK)
+            {
+                this.playersSpawn = block.getLocation();
+                block.setType(Material.AIR);
+            }
+            else if(block.getType() == Material.GOLD_BLOCK)
+            {
+                this.bonusChestSpawns.add(block.getLocation());
+                block.setType(Material.AIR);
+            }
+            else if(block.getType() == Material.DIAMOND_BLOCK)
+            {
+                this.mobSpawns.add(block.getLocation());
+                block.setType(Material.AIR);
+            }
+        }
     }
     
-    public Area(Door exitDoor, Location spawn)
+    public ArrayList<Block> getAreaBlocks()
     {
-        this.areaType = AreaType.START;
-        this.mobSpawns = null;
-        this.entryDoor = null;
-        this.exitDoor = exitDoor;
-        this.spawnLocation = spawn;
+        return this.areaBlocks;
     }
     
-    public void enter()
+    public ArrayList<Location> getBonusChestSpawns()
     {
-        this.entryDoor.open();
-    }
-    
-    public void entered()
-    {
-        this.entryDoor.close();
-    }
-    
-    public void exit()
-    {
-        this.exitDoor.open();
-    }
-    
-    public void exited()
-    {
-        this.exitDoor.close();
-        this.reset();
-    }
-    
-    public void reset()
-    {
-        this.entryDoor = null;
-        this.exitDoor = null;
-    }
-    
-    public Door getEntryDoor()
-    {
-        return this.entryDoor;
-    }
-    
-    public Door getExitDoor()
-    {
-        return this.exitDoor;
+        return this.bonusChestSpawns;
     }
     
     public ArrayList<Location> getMobSpawns()
@@ -73,18 +53,8 @@ public class Area
         return this.mobSpawns;
     }
     
-    public Location getSpawnLocation()
+    public Location getPlayersSpawn()
     {
-        return this.spawnLocation;
-    }
-    
-    public AreaType getAreaType()
-    {
-        return this.areaType;
-    }
-    
-    public boolean isStartArea()
-    {
-        return this.areaType == AreaType.START;
+        return this.playersSpawn;
     }
 }

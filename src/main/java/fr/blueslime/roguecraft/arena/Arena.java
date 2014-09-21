@@ -2,7 +2,6 @@ package fr.blueslime.roguecraft.arena;
 
 import fr.blueslime.roguecraft.Messages;
 import fr.blueslime.roguecraft.RogueCraft;
-import fr.blueslime.roguecraft.arena.Area.AreaType;
 import fr.blueslime.roguecraft.network.Status;
 import java.io.File;
 import java.util.ArrayList;
@@ -31,6 +30,7 @@ public class Arena
     private UUID arenaId;
     private Status status;
     private BeginTimer timer;
+    private WaveSystem waveSystem;
     private ArrayList<Area> areas;
     private Area actualArea;
     private int wave;
@@ -43,6 +43,7 @@ public class Arena
     {
         this.players = new ArrayList<>();        
         this.status = Status.Available;
+        this.waveSystem = new WaveSystem(this);
         this.timer = null;
         this.wave = 1;
         
@@ -67,13 +68,9 @@ public class Arena
             return Messages.alreadyInGame;
         }
         
-        if(this.actualArea == null)
-            this.actualArea = this.getSpawnArea();
-        
         player.sendMessage(Messages.joinArena);
-        player.teleport(this.actualArea.getSpawnLocation());
+        player.teleport(new Location(this.world, 0, 70, 0));
         players.add(new ArenaPlayer(new VirtualPlayer(player)));
-        RogueCraft.getPlugin().getSongMachine().addPlayer(player);
         
         this.broadcastMessage(Messages.playerJoinedArena.replace("${PSEUDO}", player.getName()).replace("${JOUEURS}", "" + players.size()).replace("${JOUEURS_MAX}", "" + this.maxPlayers));
     
@@ -207,23 +204,7 @@ public class Arena
         for(PotionEffect pe : player.getActivePotionEffects())
             player.removePotionEffect(pe.getType());
     }
-    
-    public void newWave()
-    {
-        if(this.actualArea.getAreaType() == AreaType.START)
-        {
-            
-        }
-        else if(this.actualArea.getAreaType() == AreaType.NORMAL)
-        {
-            
-        }
-        else if(this.actualArea.getAreaType() == AreaType.BOSS)
-        {
-            
-        }
-    }
-    
+
     public void startGame()
     {
         this.status = Status.InGame;
@@ -256,11 +237,12 @@ public class Arena
         
         this.timer = null;
         
-        RogueCraft.getPlugin().getSongMachine().play(this.players);
         RogueCraft.getPlugin().getNetworkManager().sendArenasInfos(false);
         
-        RogueCraft.getPlugin().getAreaGenerator().next(this);
-        this.actualArea.exit();
+        broadcastMessage(ChatColor.GOLD + "" + ChatColor.BOLD + "[CONSEIL] Ce jeu doit se jouer en coopération avec les autres joueurs.");
+        broadcastMessage(ChatColor.GOLD + "" + ChatColor.BOLD + "[CONSEIL] Nous pouvons que vous conseillez de vous réunir en vocal, sur le mumble de SamaGames par exemple ;)");
+        
+        this.waveSystem.next();
     }
     
     public void endGame()
@@ -350,7 +332,6 @@ public class Arena
         ArenaPlayer player = this.getPlayer(vPlayer);
         
         this.players.remove(player);
-        RogueCraft.getPlugin().getSongMachine().removePlayer(player.getPlayer().getPlayer());
         
         if (!this.isGameStarted())
         {
@@ -513,18 +494,7 @@ public class Arena
     {
         return this.areas;
     }
-    
-    public Area getSpawnArea()
-    {
-        for(Area area : this.areas)
-        {
-            if(area.isStartArea())
-                return area;
-        }
-        
-        return null;
-    }
-    
+
     public int getActualPlayers()
     {
         int nb = 0;

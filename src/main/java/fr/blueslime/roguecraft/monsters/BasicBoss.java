@@ -16,9 +16,9 @@ public abstract class BasicBoss extends BasicMonster
 {
     private int exploadingID;
     
-    public BasicBoss(String registeredName, String displayName, double baseHealth, double baseDamage, EntityType typeOfMob)
+    public BasicBoss(String displayName, double baseHealth, double baseDamage, EntityType typeOfMob)
     {
-        super(registeredName, displayName, baseHealth, baseDamage, typeOfMob);
+        super(displayName, baseHealth, baseDamage, typeOfMob);
     }
     
     @Override

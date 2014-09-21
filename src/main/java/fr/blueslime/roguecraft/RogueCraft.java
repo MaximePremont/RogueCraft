@@ -1,9 +1,7 @@
 package fr.blueslime.roguecraft;
 
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
-import fr.blueslime.roguecraft.arena.AreaGenerator;
 import fr.blueslime.roguecraft.arena.ArenasManager;
-import fr.blueslime.roguecraft.arena.SongMachine;
 import fr.blueslime.roguecraft.commands.CommandRogueCraft;
 import fr.blueslime.roguecraft.events.*;
 import fr.blueslime.roguecraft.monsters.MonsterManager;
@@ -27,8 +25,6 @@ public class RogueCraft extends JavaPlugin
     private NetworkManager networkManager;
     private MonsterManager monsterManager;
     private StuffManager stuffManager;
-    private AreaGenerator areaGenerator;
-    private SongMachine songMachine;
     private String bungeeName;
     private int comPort;
     private WorldEditPlugin worldEdit;
@@ -64,8 +60,6 @@ public class RogueCraft extends JavaPlugin
         
         this.monsterManager = new MonsterManager();
         this.stuffManager = new StuffManager();
-        this.areaGenerator = new AreaGenerator();
-        this.songMachine = new SongMachine(this);
         
         this.getCommand("rc").setExecutor(new CommandRogueCraft());
         
@@ -98,7 +92,6 @@ public class RogueCraft extends JavaPlugin
         Bukkit.getPluginManager().registerEvents(new RCPlayerLoginEvent(), this);
         Bukkit.getPluginManager().registerEvents(new RCPlayerQuitEvent(), this);
         Bukkit.getPluginManager().registerEvents(new RCPlayerRespawnEvent(), this);
-        Bukkit.getPluginManager().registerEvents(new RCSongEndEvent(), this);
     }
 
     public void kickPlayer(final Player player)
@@ -152,16 +145,6 @@ public class RogueCraft extends JavaPlugin
     public StuffManager getStuffManager()
     {
         return this.stuffManager;
-    }
-    
-    public AreaGenerator getAreaGenerator()
-    {
-        return this.areaGenerator;
-    }
-    
-    public SongMachine getSongMachine()
-    {
-        return this.songMachine;
     }
     
     public int getComPort()

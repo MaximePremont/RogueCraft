@@ -15,9 +15,9 @@ import org.bukkit.potion.PotionEffectType;
 
 public class TestMob extends BasicMonster
 {
-    public TestMob(String registeredName, String displayName, double baseHealth, double baseDamage, EntityType typeOfMob)
+    public TestMob(String displayName, double baseHealth, double baseDamage, EntityType typeOfMob)
     {
-        super(registeredName, displayName, baseHealth, baseDamage, typeOfMob);
+        super(displayName, baseHealth, baseDamage, typeOfMob);
     }
 
     @Override

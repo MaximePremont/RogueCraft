@@ -107,7 +107,7 @@ public class PlayerStuff
         this.strenthPotion = strenthPotion;
     }
 
-    public boolean getBedrockPotion()
+    public boolean hasBedrockPotion()
     {
         return bedrockPotion;
     }

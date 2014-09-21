@@ -4,12 +4,10 @@ import fr.blueslime.roguecraft.arena.ArenaPlayer;
 import fr.blueslime.roguecraft.utils.ItemUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 public class StuffManager
 {
-    public static enum PlayerClass { ARCHER, KNIGHT, WIZARD }
+    public static enum PlayerClass { ARCHER, KNIGHT, WIZARD, UNKNOW }
 
     public ItemStack[] createArmor(ArenaPlayer player)
     {
@@ -45,6 +43,7 @@ public class StuffManager
         }
         else
         {
+            player.setPlayerClass(PlayerClass.UNKNOW);
             return new ItemStack(Material.GLASS, 1);
         }
     }

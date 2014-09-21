@@ -1,7 +1,6 @@
 package fr.blueslime.roguecraft.monsters;
 
 import fr.blueslime.roguecraft.RogueCraft;
-import fr.blueslime.roguecraft.arena.ArenaPlayer;
 import fr.blueslime.roguecraft.arena.Wave;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -14,7 +13,6 @@ import org.bukkit.metadata.FixedMetadataValue;
 
 public abstract class BasicMonster implements Cloneable
 {
-    private final String registeredName;
     private final String displayName;
     private final EntityType typeOfMob;
     
@@ -23,9 +21,8 @@ public abstract class BasicMonster implements Cloneable
     
     private Wave wave;
         
-    public BasicMonster(String registeredName, String displayName, double baseHealth, double baseDamage, EntityType typeOfMob)
+    public BasicMonster(String displayName, double baseHealth, double baseDamage, EntityType typeOfMob)
     {
-        this.registeredName = registeredName;
         this.displayName = displayName;
         this.baseHealth = baseHealth;
         this.baseDamage = baseDamage;
@@ -39,7 +36,6 @@ public abstract class BasicMonster implements Cloneable
         lEntity.setCustomName(ChatColor.GOLD + this.displayName);
         lEntity.setMaxHealth(this.getCalculatedHealth(monsterLevel));
         lEntity.setHealth(this.getCalculatedHealth(monsterLevel));
-        lEntity.setMetadata("RC-REGISTERNAME", new FixedMetadataValue(RogueCraft.getPlugin(), this.registeredName));
         lEntity.setMetadata("RC-MONSTERLEVEL", new FixedMetadataValue(RogueCraft.getPlugin(), monsterLevel));
 
         EntityEquipment ee = lEntity.getEquipment();
@@ -65,11 +61,6 @@ public abstract class BasicMonster implements Cloneable
     public abstract ItemStack getArmorBoots();
     
     public abstract ItemStack getAtttackWeapon();
-    
-    public String getRegisteredName()
-    {
-        return this.registeredName;
-    }
     
     public String getDisplayName()
     {
