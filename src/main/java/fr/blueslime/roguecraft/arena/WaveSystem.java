@@ -1,13 +1,17 @@
 package fr.blueslime.roguecraft.arena;
 
+import com.google.common.collect.Lists;
+import com.google.common.math.IntMath;
 import fr.blueslime.roguecraft.Messages;
 import fr.blueslime.roguecraft.RogueCraft;
 import fr.blueslime.roguecraft.arena.Wave.WaveType;
 import fr.blueslime.roguecraft.monsters.BasicBoss;
 import fr.blueslime.roguecraft.monsters.BasicMonster;
 import java.io.File;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 import org.bukkit.Bukkit;
 
@@ -126,11 +130,18 @@ public class WaveSystem
         }
         else
         {
-            /**
-             * 
-             * TODO: Séparer la liste des monstres en parties (selon le nombre de points de spawns)
-             * 
-             */
+            int partitionSize = IntMath.divide(wave.getMonsters().size(), wave.getWaveArea().getMobSpawns().size(), RoundingMode.UP);
+            List<List<BasicMonster>> partitions = Lists.partition(wave.getMonsters(), partitionSize);
+            
+            for(int i = 0; i < partitions.size(); i++)
+            {
+                List<BasicMonster> monsterList = partitions.get(i);
+                
+                for(BasicMonster monster : monsterList)
+                {
+                    monster.spawnMob(wave.getWaveArea().getMobSpawns().get(i), arena.getWaveCount());
+                }
+            }
         }
         
         arena.broadcastMessage(Messages.waveStarted);
