@@ -2,6 +2,7 @@ package fr.blueslime.roguecraft.monsters;
 
 import fr.blueslime.roguecraft.RogueCraft;
 import fr.blueslime.roguecraft.arena.Wave;
+import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -13,6 +14,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 
 public abstract class BasicMonster implements Cloneable
 {
+    private final UUID uuid;
     private final String displayName;
     private final EntityType typeOfMob;
     
@@ -23,20 +25,21 @@ public abstract class BasicMonster implements Cloneable
         
     public BasicMonster(String displayName, double baseHealth, double baseDamage, EntityType typeOfMob)
     {
+        this.uuid = UUID.randomUUID();
         this.displayName = displayName;
         this.baseHealth = baseHealth;
         this.baseDamage = baseDamage;
         this.typeOfMob = typeOfMob;
     }
     
-    public LivingEntity spawnMob(Wave wave, Location location, int monsterLevel)
+    public LivingEntity spawnMob(Location location, int waveCount)
     {
         LivingEntity lEntity = Bukkit.getWorld("world").spawnCreature(location, this.typeOfMob);
 
         lEntity.setCustomName(ChatColor.GOLD + this.displayName);
-        lEntity.setMaxHealth(this.getCalculatedHealth(monsterLevel));
-        lEntity.setHealth(this.getCalculatedHealth(monsterLevel));
-        lEntity.setMetadata("RC-MONSTERLEVEL", new FixedMetadataValue(RogueCraft.getPlugin(), monsterLevel));
+        lEntity.setMaxHealth(this.getCalculatedHealth(waveCount));
+        lEntity.setHealth(this.getCalculatedHealth(waveCount));
+        lEntity.setMetadata("RC-MOBUUID", new FixedMetadataValue(RogueCraft.getPlugin(), this.uuid.toString()));
 
         EntityEquipment ee = lEntity.getEquipment();
 
@@ -59,8 +62,12 @@ public abstract class BasicMonster implements Cloneable
     public abstract ItemStack getArmorChestplate();
     public abstract ItemStack getArmorLeggings();
     public abstract ItemStack getArmorBoots();
-    
     public abstract ItemStack getAtttackWeapon();
+    
+    public EntityType getTypeOfMob()
+    {
+        return this.typeOfMob;
+    }
     
     public String getDisplayName()
     {

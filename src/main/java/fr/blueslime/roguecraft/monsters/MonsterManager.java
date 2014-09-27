@@ -1,7 +1,10 @@
 package fr.blueslime.roguecraft.monsters;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Random;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.*;
 
@@ -55,7 +58,20 @@ public class MonsterManager
         
         return getMonster("basic");
     }
+    
+    public ArrayList<BasicMonster> getMonstersByEntityType(EntityType type)
+    {
+        ArrayList<BasicMonster> temp = new ArrayList<>();
         
+        for(BasicMonster monster : this.monsters.values())
+        {
+            if(monster.getTypeOfMob() == type)
+                temp.add(monster);
+        }
+        
+        return temp;
+    }
+            
     public HashMap<String, BasicMonster> getMonsters()
     {
         return this.monsters;
@@ -74,6 +90,13 @@ public class MonsterManager
         }
                 
         return getBoss("basic");
+    }
+    
+    public BasicBoss getRandomBoss()
+    {
+        Random rand = new Random();
+        Object[] values = this.bosses.values().toArray();
+        return (BasicBoss) values[rand.nextInt(values.length)];
     }
     
     public HashMap<String, BasicBoss> getBosses()

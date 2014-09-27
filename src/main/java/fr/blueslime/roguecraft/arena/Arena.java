@@ -33,7 +33,8 @@ public class Arena
     private WaveSystem waveSystem;
     private ArrayList<Area> areas;
     private Area actualArea;
-    private int wave;
+    private Wave wave;
+    private int waveCount;
     private World world;
     private final ArrayList<ArenaPlayer> players;
     
@@ -45,7 +46,7 @@ public class Arena
         this.status = Status.Available;
         this.waveSystem = new WaveSystem(this);
         this.timer = null;
-        this.wave = 1;
+        this.waveCount = 1;
         
         this.world = world;
         this.world.setGameRuleValue("mobGriefing", "false");
@@ -402,6 +403,11 @@ public class Arena
         this.dataSource = dataSource;
     }
     
+    public void setWave(Wave wave)
+    {
+        this.wave = wave;
+    }
+    
     public void setAreas(ArrayList<Area> areas)
     {
         this.areas = areas;
@@ -416,6 +422,11 @@ public class Arena
                 aPlayer.setRole(role);
             }
         }
+    }
+    
+    public void upWaveCount()
+    {
+        this.waveCount += 1;
     }
 
     public String getArenaName()
@@ -438,9 +449,14 @@ public class Arena
         return this.maxPlayers;
     }
     
-    public int getWave()
+    public Wave getWave()
     {
         return this.wave;
+    }
+    
+    public int getWaveCount()
+    {
+        return this.waveCount;
     }
 
     public UUID getArenaId()
@@ -493,6 +509,11 @@ public class Arena
     public ArrayList<Area> getAreas()
     {
         return this.areas;
+    }
+    
+    public WaveSystem getWaveSystem()
+    {
+        return this.waveSystem;
     }
 
     public int getActualPlayers()

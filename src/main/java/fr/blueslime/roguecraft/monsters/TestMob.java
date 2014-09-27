@@ -21,9 +21,9 @@ public class TestMob extends BasicMonster
     }
 
     @Override
-    public LivingEntity spawnMob(Wave wave, Location location, int monsterLevel)
+    public LivingEntity spawnMob(Location location, int monsterLevel)
     {
-        LivingEntity entity = super.spawnMob(wave, location, monsterLevel);
+        LivingEntity entity = super.spawnMob(location, monsterLevel);
         
         entity.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 1));
         

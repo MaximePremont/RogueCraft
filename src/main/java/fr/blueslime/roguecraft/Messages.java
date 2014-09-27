@@ -8,6 +8,7 @@ public class Messages
     
     public static String notEnougthPlayers = PLUGIN_TAG + ChatColor.RED + "Il n'y a plus assez de joueurs pour commencer.";
     public static String startIn = PLUGIN_TAG + ChatColor.YELLOW + "Début du jeu dans " + ChatColor.AQUA + "${TIME}";
+    public static String startWaveIn = PLUGIN_TAG + ChatColor.YELLOW + "Début de la vague dans " + ChatColor.AQUA + "${TIME}";
     public static String alreadyInArena = ChatColor.RED + "Vous êtes dèjà dans l'arène. Ceci est une erreur, merci de nous la signaler.";
     public static String arenaFull = ChatColor.RED + "L'arène est pleine.";
     public static String alreadyInGame = ChatColor.RED + "Vous êtes dèjà en jeu dans une autre arène.";
