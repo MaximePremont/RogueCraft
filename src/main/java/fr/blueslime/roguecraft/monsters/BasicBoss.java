@@ -1,6 +1,7 @@
 package fr.blueslime.roguecraft.monsters;
 
 import fr.blueslime.roguecraft.RogueCraft;
+import fr.blueslime.roguecraft.arena.Arena;
 import fr.blueslime.roguecraft.utils.ColorUtils;
 import java.util.Random;
 import org.bukkit.Bukkit;
@@ -9,8 +10,10 @@ import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.metadata.FixedMetadataValue;
 
 public abstract class BasicBoss extends BasicMonster
 {
@@ -19,6 +22,15 @@ public abstract class BasicBoss extends BasicMonster
     public BasicBoss(String displayName, double baseHealth, double baseDamage, EntityType typeOfMob)
     {
         super(displayName, baseHealth, baseDamage, typeOfMob);
+    }
+    
+    @Override
+    public LivingEntity spawnMob(Arena arena, Location location, int waveCount)
+    {
+        LivingEntity lEntity = super.spawnMob(arena, location, waveCount);
+        lEntity.setMetadata("RC-BOSS", new FixedMetadataValue(RogueCraft.getPlugin(), true));
+        
+        return lEntity;
     }
     
     @Override

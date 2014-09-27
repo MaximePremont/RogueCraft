@@ -6,6 +6,7 @@ import fr.blueslime.roguecraft.network.Status;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.UUID;
+import net.zyuiop.statsapi.StatsApi;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -230,8 +231,7 @@ public class Arena
             
             player.giveStuff();
             
-            /** QUOI METTRE DANS LES STATS ? **/
-            //StatsApi.increaseStat(p, "roguecraft", "played_games", 1);
+            StatsApi.increaseStat(p, "roguecraft", "played_games", 1);
         }
         
         if(this.timer != null)

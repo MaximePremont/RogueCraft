@@ -3,9 +3,12 @@ package fr.blueslime.roguecraft.events;
 import fr.blueslime.roguecraft.RogueCraft;
 import fr.blueslime.roguecraft.arena.Arena;
 import fr.blueslime.roguecraft.arena.Arena.Role;
+import fr.blueslime.roguecraft.arena.ArenaPlayer;
 import fr.blueslime.roguecraft.arena.VirtualPlayer;
 import fr.blueslime.roguecraft.monsters.BasicMonster;
 import java.util.UUID;
+import net.zyuiop.coinsManager.CoinsManager;
+import net.zyuiop.statsapi.StatsApi;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -72,6 +75,19 @@ public class RCEntityDamageByEntityEvent implements Listener
             {
                 Arena arena = RogueCraft.getPlugin().getArenasManager().getArena(UUID.fromString(damaged.getMetadata("RC-ARENA").get(0).asString()));
                 arena.getWave().monsterKilled();
+                
+                for(ArenaPlayer player : arena.getActualPlayersList())
+                {
+                    if(damaged.hasMetadata("RC-BOSS"))
+                    {
+                        CoinsManager.creditJoueur(player.getPlayer().getPlayerID(), 100, true);
+                        StatsApi.increaseStat(player.getPlayer().getPlayerID(), "roguecraft", "xp", 50);
+                    }
+                    else
+                    {
+                        StatsApi.increaseStat(player.getPlayer().getPlayerID(), "roguecraft", "xp", 5);
+                    }
+                }
             }
         }
         

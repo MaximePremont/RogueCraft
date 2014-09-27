@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import net.zyuiop.coinsManager.CoinsManager;
 import org.bukkit.Bukkit;
 
 public class WaveSystem
@@ -160,6 +161,11 @@ public class WaveSystem
     public void end()
     {
         arena.broadcastMessage(Messages.waveEnded);
+        
+        for(ArenaPlayer player : arena.getActualPlayersList())
+        {
+            CoinsManager.creditJoueur(player.getPlayer().getPlayerID(), 10, true);
+        }
         
         this.endWaveTimer = new EndWaveTimer(arena);
         this.endWaveTimer.start();
