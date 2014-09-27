@@ -18,4 +18,6 @@ public class Messages
     public static String eliminatedPlayer = PLUGIN_TAG + "${PSEUDO} à été tué ! (${REMAINPLAYERS} Joueurs restants)";
     public static String lastEliminatedPlayer = PLUGIN_TAG + "${PSEUDO} était notre dernier espoir !";
     public static String tryAgainLater = PLUGIN_TAG + ChatColor.GREEN + "Vous réessayerez la prochaine fois ;)";
+    public static String generatingArea = PLUGIN_TAG + ChatColor.AQUA + "Génération de l'arène, veuillez patienter...";
+    public static String waveStarted = PLUGIN_TAG + ChatColor.YELLOW + "La vague commence, attention !";
 }

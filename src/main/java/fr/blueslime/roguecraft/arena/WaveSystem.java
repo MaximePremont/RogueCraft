@@ -1,5 +1,6 @@
 package fr.blueslime.roguecraft.arena;
 
+import fr.blueslime.roguecraft.Messages;
 import fr.blueslime.roguecraft.RogueCraft;
 import fr.blueslime.roguecraft.arena.Wave.WaveType;
 import fr.blueslime.roguecraft.monsters.BasicBoss;
@@ -29,6 +30,7 @@ public class WaveSystem
          */
         
         Bukkit.getLogger().info("[RogueCraft-WaveSystem] Starting generating...");
+        arena.broadcastMessage(Messages.generatingArea);
         
         WaveType waveType = WaveType.NORMAL;
         
@@ -130,6 +132,8 @@ public class WaveSystem
              * 
              */
         }
+        
+        arena.broadcastMessage(Messages.waveStarted);
     }
     
     public boolean isFinished()
