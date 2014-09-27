@@ -1,6 +1,6 @@
 package fr.blueslime.roguecraft.monsters;
 
-import fr.blueslime.roguecraft.arena.Wave;
+import fr.blueslime.roguecraft.arena.Arena;
 import fr.blueslime.roguecraft.utils.ItemUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -21,9 +21,9 @@ public class TestMob extends BasicMonster
     }
 
     @Override
-    public LivingEntity spawnMob(Location location, int monsterLevel)
+    public LivingEntity spawnMob(Arena arena, Location location, int monsterLevel)
     {
-        LivingEntity entity = super.spawnMob(location, monsterLevel);
+        LivingEntity entity = super.spawnMob(arena, location, monsterLevel);
         
         entity.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 1));
         

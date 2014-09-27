@@ -1,6 +1,7 @@
 package fr.blueslime.roguecraft.monsters;
 
 import fr.blueslime.roguecraft.RogueCraft;
+import fr.blueslime.roguecraft.arena.Arena;
 import fr.blueslime.roguecraft.arena.Wave;
 import java.util.UUID;
 import org.bukkit.Bukkit;
@@ -32,7 +33,7 @@ public abstract class BasicMonster implements Cloneable
         this.typeOfMob = typeOfMob;
     }
     
-    public LivingEntity spawnMob(Location location, int waveCount)
+    public LivingEntity spawnMob(Arena arena, Location location, int waveCount)
     {
         LivingEntity lEntity = Bukkit.getWorld("world").spawnCreature(location, this.typeOfMob);
 
@@ -40,6 +41,7 @@ public abstract class BasicMonster implements Cloneable
         lEntity.setMaxHealth(this.getCalculatedHealth(waveCount));
         lEntity.setHealth(this.getCalculatedHealth(waveCount));
         lEntity.setMetadata("RC-MOBUUID", new FixedMetadataValue(RogueCraft.getPlugin(), this.uuid.toString()));
+        lEntity.setMetadata("RC-ARENA", new FixedMetadataValue(RogueCraft.getPlugin(), arena.getArenaId().toString()));
 
         EntityEquipment ee = lEntity.getEquipment();
 

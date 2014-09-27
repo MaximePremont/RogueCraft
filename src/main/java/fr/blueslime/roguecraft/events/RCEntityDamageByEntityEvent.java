@@ -63,8 +63,18 @@ public class RCEntityDamageByEntityEvent implements Listener
                     }
                 }
             }
-            
-            event.setCancelled(true);
         }
+        else
+        {
+            Entity damaged = event.getEntity();
+            
+            if(damaged.hasMetadata("RC-ARENA"))
+            {
+                Arena arena = RogueCraft.getPlugin().getArenasManager().getArena(UUID.fromString(damaged.getMetadata("RC-ARENA").get(0).asString()));
+                arena.getWave().monsterKilled();
+            }
+        }
+        
+        event.setCancelled(true);
     }
 }

@@ -6,17 +6,17 @@ import static java.lang.Thread.sleep;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 
-public class WaveTimer extends Thread
+public class EndWaveTimer extends Thread
 {
     private Arena parent;
     private long time;
     private boolean count = false;
     private boolean cont = true;
 
-    public WaveTimer(Arena parent)
+    public EndWaveTimer(Arena parent)
     {
         this.parent = parent;
-        time = 10; // 30 secondes
+        time = 5; // 30 secondes
     }
 
     public void end()
@@ -43,7 +43,7 @@ public class WaveTimer extends Thread
                     {
                         public void run()
                         {
-                            parent.getWaveSystem().start();
+                            parent.getWaveSystem().next();
                         }
                     });
                     return;

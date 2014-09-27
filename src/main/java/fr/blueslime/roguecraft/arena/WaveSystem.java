@@ -19,6 +19,7 @@ public class WaveSystem
 {
     private final Arena arena;
     private WaveTimer waveTimer;
+    private EndWaveTimer endWaveTimer;
     
     public WaveSystem(Arena arena)
     {
@@ -27,6 +28,12 @@ public class WaveSystem
     
     public void next()
     {
+        if(this.endWaveTimer != null)
+        {
+            this.endWaveTimer.end();
+            this.endWaveTimer = null;
+        }
+        
         /**
          * 
          * TODO: Teleporter les joueurs dans une salle en bedrock d'attente pendant la génération 
@@ -78,7 +85,7 @@ public class WaveSystem
         Bukkit.getLogger().info("[RogueCraft-WaveSystem] Area builded in world!");
         
         Area area = null; // Faire l'object avec les blocs posés via le schematics;
-        Wave wave = new Wave(waveType, arena.getWaveCount(), area);
+        Wave wave = new Wave(arena, waveType, arena.getWaveCount(), area);
         RandomizerLogic randLogin = new RandomizerLogic();
         
         Bukkit.getLogger().info("[RogueCraft-WaveSystem] Creating mob list...");
@@ -112,6 +119,8 @@ public class WaveSystem
         this.waveTimer = new WaveTimer(arena);
         this.waveTimer.start();
         
+        arena.broadcastMessage(Messages.waveStarting);
+        
         Bukkit.getLogger().info("[RogueCraft-WaveSystem] Wave generated, end of work! Time to sleep :D");
     }
     
@@ -122,11 +131,12 @@ public class WaveSystem
         if(this.waveTimer != null)
         {
             this.waveTimer.end();
+            this.waveTimer = null;
         }
         
         if(wave.getWaveType() == WaveType.BOSS)
         {
-            wave.getBoss().spawnMob(wave.getWaveArea().getMobSpawns().get(0), arena.getWaveCount());
+            wave.getBoss().spawnMob(arena, wave.getWaveArea().getMobSpawns().get(0), arena.getWaveCount());
         }
         else
         {
@@ -139,12 +149,20 @@ public class WaveSystem
                 
                 for(BasicMonster monster : monsterList)
                 {
-                    monster.spawnMob(wave.getWaveArea().getMobSpawns().get(i), arena.getWaveCount());
+                    monster.spawnMob(arena, wave.getWaveArea().getMobSpawns().get(i), arena.getWaveCount());
                 }
             }
         }
         
         arena.broadcastMessage(Messages.waveStarted);
+    }
+    
+    public void end()
+    {
+        arena.broadcastMessage(Messages.waveEnded);
+        
+        this.endWaveTimer = new EndWaveTimer(arena);
+        this.endWaveTimer.start();
     }
     
     public boolean isFinished()

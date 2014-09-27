@@ -1,5 +1,6 @@
 package fr.blueslime.roguecraft.arena;
 
+import fr.blueslime.roguecraft.RogueCraft;
 import fr.blueslime.roguecraft.monsters.BasicBoss;
 import fr.blueslime.roguecraft.monsters.BasicMonster;
 import java.util.ArrayList;
@@ -9,19 +10,23 @@ public class Wave
 {
     public static enum WaveType { NORMAL, BOSS }
     
+    private final Arena arena;
     private final WaveType waveType;
     private final int waveNumber;
     private final Area waveArea;
     private int monsterCount;
+    private boolean locked;
     
     private ArrayList<BasicMonster> monsters;
     private BasicBoss boss;
     
-    public Wave(WaveType waveType, int waveNumber, Area waveArea)
+    public Wave(Arena arena, WaveType waveType, int waveNumber, Area waveArea)
     {
+        this.arena = arena;
         this.waveType = waveType;
         this.waveNumber = waveNumber;
         this.waveArea = waveArea;
+        this.locked = false;
     }
     
     public void registerMob(BasicMonster monster)
@@ -39,6 +44,12 @@ public class Wave
     public void monsterKilled()
     {
         this.monsterCount -= 1;
+        
+        if(this.monsterCount == 0 && !locked)
+        {
+            this.locked = true;
+            this.arena.getWaveSystem().end();
+        }
     }
     
     public ArrayList<BasicMonster> getMonsters()
