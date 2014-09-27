@@ -159,6 +159,7 @@ public class ArenasManager
 
                 arenaa.setArenaName(arenaData.getString("name"));
                 arenaa.setMapName(arenaData.getString("mapname"));
+                arenaa.setTheme(arenaData.getString("theme"));
                 arenaa.setMaxPlayers((Integer) arenaData.getInt("max-players"));
                 arenaa.setMinPlayers(arenaData.getInt("min-players"));
 

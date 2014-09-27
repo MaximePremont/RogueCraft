@@ -25,6 +25,7 @@ public class Arena
     
     private String arenaName;
     private String mapName;
+    private String theme;
     private int maxPlayers;
     private int minPlayers;
     private UUID arenaId;
@@ -378,6 +379,11 @@ public class Arena
         this.mapName = mapName;
     }
     
+    public void setTheme(String theme)
+    {
+        this.theme = theme;
+    }
+    
     public void setMinPlayers(int minPlayers)
     {
         this.minPlayers = minPlayers;
@@ -437,6 +443,11 @@ public class Arena
     public String getMapName()
     {
         return this.mapName;
+    }
+    
+    public String getTheme()
+    {
+        return this.theme;
     }
     
     public int getMinPlayers()

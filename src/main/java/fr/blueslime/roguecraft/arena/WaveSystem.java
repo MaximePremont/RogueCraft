@@ -46,9 +46,9 @@ public class WaveSystem
         
         for(File file : schematics)
         {
-            if(waveType == WaveType.BOSS && file.getName().startsWith("boss_"))
+            if(waveType == WaveType.BOSS && file.getName().startsWith("boss_" + arena.getTheme().toLowerCase() + "_"))
                 wantedSchematics.add(file);
-            else if(waveType == WaveType.NORMAL && file.getName().startsWith("normal_"))
+            else if(waveType == WaveType.NORMAL && file.getName().startsWith("normal_" + arena.getTheme().toLowerCase() + "_"))
                 wantedSchematics.add(file);
         }
         
