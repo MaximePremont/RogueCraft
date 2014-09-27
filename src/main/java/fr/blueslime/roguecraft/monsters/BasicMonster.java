@@ -64,6 +64,11 @@ public abstract class BasicMonster implements Cloneable
     public abstract ItemStack getArmorBoots();
     public abstract ItemStack getAtttackWeapon();
     
+    public UUID getUniqueIdentifier()
+    {
+        return this.uuid;
+    }
+    
     public EntityType getTypeOfMob()
     {
         return this.typeOfMob;
@@ -89,9 +94,9 @@ public abstract class BasicMonster implements Cloneable
         return this.baseHealth * (1.2 * monsterLevel);
     }
 
-    public double getCalculatedDamage(int monsterLevel)
+    public double getCalculatedDamage(double damageBase, int monsterLevel)
     {
-        return this.baseDamage * (1.1 * monsterLevel);
+        return damageBase + (this.baseDamage * (0.4 * monsterLevel));
     }
     
     @Override

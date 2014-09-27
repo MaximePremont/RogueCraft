@@ -3,6 +3,7 @@ package fr.blueslime.roguecraft.arena;
 import fr.blueslime.roguecraft.monsters.BasicBoss;
 import fr.blueslime.roguecraft.monsters.BasicMonster;
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class Wave
 {
@@ -43,6 +44,17 @@ public class Wave
     public ArrayList<BasicMonster> getMonsters()
     {
         return this.monsters;
+    }
+    
+    public BasicMonster getMonster(UUID uuid)
+    {
+        for(BasicMonster monster : this.monsters)
+        {
+            if(monster.getUniqueIdentifier().equals(uuid))
+                return monster;
+        }
+        
+        return null;
     }
     
     public BasicBoss getBoss()

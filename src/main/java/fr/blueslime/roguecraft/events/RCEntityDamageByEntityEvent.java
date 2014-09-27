@@ -4,6 +4,8 @@ import fr.blueslime.roguecraft.RogueCraft;
 import fr.blueslime.roguecraft.arena.Arena;
 import fr.blueslime.roguecraft.arena.Arena.Role;
 import fr.blueslime.roguecraft.arena.VirtualPlayer;
+import fr.blueslime.roguecraft.monsters.BasicMonster;
+import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -34,13 +36,15 @@ public class RCEntityDamageByEntityEvent implements Listener
                     {
                         Entity damager = event.getDamager();
                         
-                        if(damager.hasMetadata("RC-REGISTERNAME") && damager.hasMetadata("RC-MONSTERLEVEL"))
+                        if(damager.hasMetadata("RC-MOBUUID"))
                         {
-                            String registerNameMeta = damager.getMetadata("RC-REGISTERNAME").get(0).asString();
-                            int monsterLevelMeta = damager.getMetadata("RC-MONSTERLEVEL").get(0).asInt();
+                            BasicMonster monster = arena.getWave().getMonster(UUID.fromString(damager.getMetadata("RC-MOBUUID").get(0).asString()));
                             
-                            lastDamage = RogueCraft.getPlugin().getMonsterManager().getMonster(registerNameMeta).getCalculatedDamage(monsterLevelMeta);
-                            damaged.damage(lastDamage);
+                            if(monster != null)
+                            {
+                                lastDamage = monster.getCalculatedDamage(event.getDamage(), arena.getWaveCount());
+                                damaged.damage(lastDamage);
+                            }
                         }
                         else
                         {
