@@ -7,6 +7,7 @@ import fr.blueslime.roguecraft.arena.Arena.Role;
 import fr.blueslime.roguecraft.stuff.PlayerStuff;
 import fr.blueslime.roguecraft.stuff.PlayerStuffDeserializer;
 import fr.blueslime.roguecraft.stuff.StuffManager.PlayerClass;
+import net.samagames.network.client.GamePlayer;
 import net.zyuiop.coinsManager.CoinsManager;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -21,7 +22,7 @@ import org.bukkit.potion.PotionType;
 
 public class ArenaPlayer
 {
-    private final VirtualPlayer player;
+    private final GamePlayer player;
     private Role role;
     private Location deathLocation;
     
@@ -30,7 +31,7 @@ public class ArenaPlayer
     private final ItemStack weapon;
     private PlayerClass pClass;
     
-    public ArenaPlayer(VirtualPlayer player)
+    public ArenaPlayer(GamePlayer player)
     {
         this.player = player;
         this.role = Role.PLAYER;
@@ -126,7 +127,7 @@ public class ArenaPlayer
         this.deathLocation = deathLocation;
     }
         
-    public VirtualPlayer getPlayer()
+    public GamePlayer getPlayer()
     {
         return this.player;
     }

@@ -1,9 +1,8 @@
 package fr.blueslime.roguecraft.events;
 
 import fr.blueslime.roguecraft.RogueCraft;
-import fr.blueslime.roguecraft.arena.Arena;
-import fr.blueslime.roguecraft.arena.ArenaPlayer;
-import fr.blueslime.roguecraft.arena.VirtualPlayer;
+import net.samagames.network.client.GameArena;
+import net.samagames.network.client.GamePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -15,7 +14,7 @@ public class RCPlayerChatEvent implements Listener
     public void event(AsyncPlayerChatEvent event)
     {
         Player player = event.getPlayer();
-        Arena arena = RogueCraft.getPlugin().getArenasManager().getPlayerArena(new VirtualPlayer(player));
+        GameArena arena = RogueCraft.getPlugin().getArenasManager().getPlayerArena(player.getUniqueId());
 
         if (arena == null)
         {
@@ -24,7 +23,7 @@ public class RCPlayerChatEvent implements Listener
         
         event.getRecipients().clear();
         
-        for(ArenaPlayer aPlayer : arena.getPlayers())
+        for(GamePlayer aPlayer : arena.getPlayers())
         {
             event.getRecipients().add(aPlayer.getPlayer().getPlayer());
         }

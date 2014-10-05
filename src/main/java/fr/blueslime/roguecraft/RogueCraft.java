@@ -4,30 +4,31 @@ import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import fr.blueslime.roguecraft.arena.ArenasManager;
 import fr.blueslime.roguecraft.commands.CommandRogueCraft;
 import fr.blueslime.roguecraft.events.*;
-import fr.blueslime.roguecraft.monsters.MonsterManager;
-import fr.blueslime.roguecraft.network.NetworkManager;
 import fr.blueslime.roguecraft.stuff.StuffManager;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import net.samagames.network.client.GamePlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.plugin.java.JavaPlugin;
 
-public class RogueCraft extends JavaPlugin
+public class RogueCraft extends GamePlugin
 {
     private static RogueCraft plugin;
     private ArenasManager arenasManager;
-    private NetworkManager networkManager;
-    private MonsterManager monsterManager;
     private StuffManager stuffManager;
     private String bungeeName;
     private int comPort;
     private WorldEditPlugin worldEdit;
+    
+    public RogueCraft()
+    {
+        super("roguecraft");
+    }
     
     @Override
     public void onEnable()
@@ -51,14 +52,9 @@ public class RogueCraft extends JavaPlugin
         this.saveResource("Sacrificial.nbs", false);
         this.saveResource("VanillaTwilight.nbs", false);
         
-        this.arenasManager = new ArenasManager(this);
+        this.arenasManager = new ArenasManager();
         this.arenasManager.loadArenas();
         
-        this.networkManager = new NetworkManager(this);
-        this.networkManager.initListener();
-        this.networkManager.initInfosSender();
-        
-        this.monsterManager = new MonsterManager();
         this.stuffManager = new StuffManager();
         
         this.getCommand("rc").setExecutor(new CommandRogueCraft());
@@ -69,10 +65,7 @@ public class RogueCraft extends JavaPlugin
     }
 
     @Override
-    public void onDisable()
-    {
-        this.networkManager.disable();
-    }
+    public void onDisable() {}
     
     public void registerEvents()
     {
@@ -88,8 +81,6 @@ public class RogueCraft extends JavaPlugin
         Bukkit.getPluginManager().registerEvents(new RCPlayerDeathEvent(), this);
         Bukkit.getPluginManager().registerEvents(new RCPlayerDropItemEvent(), this);
         Bukkit.getPluginManager().registerEvents(new RCPlayerInteractEvent(), this);
-        Bukkit.getPluginManager().registerEvents(new RCPlayerJoinEvent(), this);
-        Bukkit.getPluginManager().registerEvents(new RCPlayerLoginEvent(), this);
         Bukkit.getPluginManager().registerEvents(new RCPlayerQuitEvent(), this);
         Bukkit.getPluginManager().registerEvents(new RCPlayerRespawnEvent(), this);
     }
@@ -110,6 +101,7 @@ public class RogueCraft extends JavaPlugin
         
         Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable()
         {
+            @Override
             public void run()
             {
                 player.kickPlayer("Une erreur s'est produite lors de la tentative de kick.");
@@ -131,17 +123,7 @@ public class RogueCraft extends JavaPlugin
     {
         return this.arenasManager;
     }
-    
-    public NetworkManager getNetworkManager()
-    {
-        return this.networkManager;
-    }
-    
-    public MonsterManager getMonsterManager()
-    {
-        return this.monsterManager;
-    }
-    
+
     public StuffManager getStuffManager()
     {
         return this.stuffManager;

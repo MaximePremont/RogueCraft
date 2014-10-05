@@ -5,29 +5,34 @@ import fr.blueslime.roguecraft.arena.Arena;
 import fr.blueslime.roguecraft.utils.ColorUtils;
 import java.util.Random;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 
-public abstract class BasicBoss extends BasicMonster
+public class BasicBoss extends BasicMonster
 {
+    private String displayName;
+    private double baseHealth;
     private int exploadingID;
     
-    public BasicBoss(String displayName, double baseHealth, double baseDamage, EntityType typeOfMob)
+    public BasicBoss(EntityType typeOfMob)
     {
-        super(displayName, baseHealth, baseDamage, typeOfMob);
+        super(typeOfMob);
     }
     
     @Override
     public LivingEntity spawnMob(Arena arena, Location location, int waveCount)
     {
         LivingEntity lEntity = super.spawnMob(arena, location, waveCount);
+        lEntity.setCustomName(ChatColor.GOLD + this.displayName);
+        lEntity.setMaxHealth(this.baseHealth);
+        lEntity.setHealth(this.baseHealth);
         lEntity.setMetadata("RC-BOSS", new FixedMetadataValue(RogueCraft.getPlugin(), true));
         
         return lEntity;
@@ -35,9 +40,7 @@ public abstract class BasicBoss extends BasicMonster
     
     @Override
     public void onDeath(final Location location)
-    {
-        super.onDeath(location);
-        
+    {        
         this.exploadingID = Bukkit.getScheduler().scheduleSyncRepeatingTask(RogueCraft.getPlugin(), new Runnable()
         {
             int compteur = 0;
@@ -82,20 +85,14 @@ public abstract class BasicBoss extends BasicMonster
     {
         Bukkit.getScheduler().cancelTask(this.exploadingID);
     }
-
-    @Override
-    public abstract ItemStack getArmorHelmet();
-
-    @Override
-    public abstract ItemStack getArmorChestplate();
-
-    @Override
-    public abstract ItemStack getArmorLeggings();
-
-    @Override
-    public abstract ItemStack getArmorBoots();
-
-    @Override
-    public abstract ItemStack getAtttackWeapon();
-
+    
+    public void setCustomName(String displayName)
+    {
+        this.displayName = displayName;
+    }
+    
+    public void setBaseHealth(double baseHealth)
+    {
+        this.baseHealth = baseHealth;
+    }
 }

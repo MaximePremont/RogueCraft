@@ -2,7 +2,8 @@ package fr.blueslime.roguecraft.events;
 
 import fr.blueslime.roguecraft.RogueCraft;
 import fr.blueslime.roguecraft.arena.Arena;
-import fr.blueslime.roguecraft.arena.VirtualPlayer;
+import fr.blueslime.roguecraft.arena.Arena.Role;
+import net.samagames.network.client.GameArena;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -15,11 +16,11 @@ public class RCPlayerDeathEvent implements Listener
     public void event(PlayerDeathEvent event)
     {
         Player deadPlayer = (Player) event.getEntity();
-        Arena arena = RogueCraft.getPlugin().getArenasManager().getPlayerArena(new VirtualPlayer(deadPlayer));
+        GameArena arena = RogueCraft.getPlugin().getArenasManager().getPlayerArena(deadPlayer.getUniqueId());
         
         event.setDeathMessage(null);
         
-        if(arena.isGameStarted())
+        if(arena.isStarted())
         {
             event.setKeepLevel(false);
             event.setDroppedExp(0);
@@ -36,7 +37,7 @@ public class RCPlayerDeathEvent implements Listener
 
             event.getDrops().clear();
 
-            arena.setRoleOfPlayer(deadPlayer, Arena.Role.SPECTATOR);
+            ((Arena)arena).setRoleOfPlayer(deadPlayer, Role.SPECTATOR);
         }
     }
 }

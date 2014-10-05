@@ -125,7 +125,7 @@ public class BeginTimer extends Thread
             ring = true;
         }
         
-        for(ArenaPlayer aPlayer : parent.getPlayers())
+        for(ArenaPlayer aPlayer : parent.getArenaPlayers())
         {
             aPlayer.getPlayer().getPlayer().setLevel(seconds);
             

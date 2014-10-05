@@ -1,6 +1,5 @@
 package fr.blueslime.roguecraft.arena;
 
-import fr.blueslime.roguecraft.Messages;
 import fr.blueslime.roguecraft.RogueCraft;
 import static java.lang.Thread.sleep;
 import org.bukkit.Bukkit;
@@ -73,7 +72,7 @@ public class EndWaveTimer extends Thread
             ring = true;
         }
         
-        for(ArenaPlayer aPlayer : parent.getPlayers())
+        for(ArenaPlayer aPlayer : parent.getArenaPlayers())
         {
             aPlayer.getPlayer().getPlayer().setLevel(seconds);
             

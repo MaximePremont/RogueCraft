@@ -2,10 +2,8 @@ package fr.blueslime.roguecraft.monsters;
 
 import fr.blueslime.roguecraft.RogueCraft;
 import fr.blueslime.roguecraft.arena.Arena;
-import fr.blueslime.roguecraft.arena.Wave;
 import java.util.UUID;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -13,23 +11,18 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 
-public abstract class BasicMonster implements Cloneable
+public class BasicMonster implements Cloneable
 {
     private final UUID uuid;
-    private final String displayName;
     private final EntityType typeOfMob;
-    
     private final double baseHealth;
-    private final double baseDamage;
-    
-    private Wave wave;
+    private ItemStack armorHelmet, armorChestplate, armorLeggings, armorBoots;
+    private ItemStack weapon;
         
-    public BasicMonster(String displayName, double baseHealth, double baseDamage, EntityType typeOfMob)
+    public BasicMonster(EntityType typeOfMob)
     {
         this.uuid = UUID.randomUUID();
-        this.displayName = displayName;
-        this.baseHealth = baseHealth;
-        this.baseDamage = baseDamage;
+        this.baseHealth = 20.0D;
         this.typeOfMob = typeOfMob;
     }
     
@@ -37,11 +30,10 @@ public abstract class BasicMonster implements Cloneable
     {
         LivingEntity lEntity = Bukkit.getWorld("world").spawnCreature(location, this.typeOfMob);
 
-        lEntity.setCustomName(ChatColor.GOLD + this.displayName);
         lEntity.setMaxHealth(this.getCalculatedHealth(waveCount));
         lEntity.setHealth(this.getCalculatedHealth(waveCount));
         lEntity.setMetadata("RC-MOBUUID", new FixedMetadataValue(RogueCraft.getPlugin(), this.uuid.toString()));
-        lEntity.setMetadata("RC-ARENA", new FixedMetadataValue(RogueCraft.getPlugin(), arena.getArenaId().toString()));
+        lEntity.setMetadata("RC-ARENA", new FixedMetadataValue(RogueCraft.getPlugin(), arena.getArenaID().toString()));
 
         EntityEquipment ee = lEntity.getEquipment();
 
@@ -55,16 +47,57 @@ public abstract class BasicMonster implements Cloneable
         return lEntity;
     }
     
-    public void onDeath(Location location)
+    public void onDeath(Location location) { /** Nothing **/ }
+
+    public void setArmorHelmet(ItemStack armorHelmet)
     {
-        this.wave.monsterKilled();
+        this.armorHelmet = armorHelmet;
     }
     
-    public abstract ItemStack getArmorHelmet();
-    public abstract ItemStack getArmorChestplate();
-    public abstract ItemStack getArmorLeggings();
-    public abstract ItemStack getArmorBoots();
-    public abstract ItemStack getAtttackWeapon();
+    public void setArmorChestplate(ItemStack armorChestplate)
+    {
+        this.armorChestplate = armorChestplate;
+    }
+    
+    public void setArmorLeggings(ItemStack armorLeggings)
+    {
+        this.armorLeggings = armorLeggings;
+    }
+    
+    public void setArmorBoots(ItemStack armorBoots)
+    {
+        this.armorBoots = armorBoots;
+    }
+    
+    public void setWeapon(ItemStack weapon)
+    {
+        this.weapon = weapon;
+    }
+    
+    public ItemStack getArmorHelmet()
+    {
+        return this.armorHelmet;
+    }
+    
+    public ItemStack getArmorChestplate()
+    {
+        return this.armorChestplate;
+    }
+    
+    public ItemStack getArmorLeggings()
+    {
+        return this.armorLeggings;
+    }
+    
+    public ItemStack getArmorBoots()
+    {
+        return this.armorBoots;
+    }
+    
+    public ItemStack getAtttackWeapon()
+    {
+        return this.weapon;
+    } 
     
     public UUID getUniqueIdentifier()
     {
@@ -76,19 +109,9 @@ public abstract class BasicMonster implements Cloneable
         return this.typeOfMob;
     }
     
-    public String getDisplayName()
-    {
-        return this.displayName;
-    }
-    
     public double getBaseHealth()
     {
         return this.baseHealth;
-    }
-    
-    public double getBaseDamage()
-    {
-        return this.baseDamage;
     }
     
     public double getCalculatedHealth(int monsterLevel)
@@ -96,9 +119,9 @@ public abstract class BasicMonster implements Cloneable
         return this.baseHealth * (1.2 * monsterLevel);
     }
 
-    public double getCalculatedDamage(double damageBase, int monsterLevel)
+    public double getCalculatedDamage(double baseDamage, int waveCount)
     {
-        return damageBase + (this.baseDamage * (0.4 * monsterLevel));
+        return baseDamage + (0.4 * waveCount);
     }
     
     @Override

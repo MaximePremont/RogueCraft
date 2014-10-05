@@ -10,7 +10,7 @@ public class CommandStart
 {
     public static boolean onCommand(CommandSender cs, Command cmnd, String string, String[] strings)
     {
-        Arena ar = RogueCraft.getPlugin().getArenasManager().getPlayerArena(((Player) cs).getUniqueId());
+        Arena ar = (Arena) RogueCraft.getPlugin().getArenasManager().getPlayerArena(((Player) cs).getUniqueId());
         ar.startGame();
         
         return true;

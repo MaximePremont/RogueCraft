@@ -3,7 +3,8 @@ package fr.blueslime.roguecraft.events;
 import fr.blueslime.roguecraft.RogueCraft;
 import fr.blueslime.roguecraft.arena.Arena;
 import fr.blueslime.roguecraft.arena.ArenaPlayer;
-import fr.blueslime.roguecraft.arena.VirtualPlayer;
+import net.samagames.network.client.GameArena;
+import net.samagames.network.client.GamePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -15,15 +16,15 @@ public class RCPlayerDropItemEvent implements Listener
     public void event(PlayerDropItemEvent event)
     {
         Player player = event.getPlayer();
-        Arena arena = RogueCraft.getPlugin().getArenasManager().getPlayerArena(new VirtualPlayer(player));
+        GameArena arena = RogueCraft.getPlugin().getArenasManager().getPlayerArena(player.getUniqueId());
         
-        if(!arena.isGameStarted())
+        if(!arena.isStarted())
         {
             event.setCancelled(true);
         }
         else
         {
-            ArenaPlayer aPlayer = arena.getPlayer(new VirtualPlayer(player));
+            ArenaPlayer aPlayer = ((Arena)arena).getPlayer(new GamePlayer(player));
             boolean bool = RogueCraft.getPlugin().getStuffManager().dropItem(aPlayer, event.getItemDrop().getItemStack());
             
             if(!bool)

@@ -4,9 +4,10 @@ import fr.blueslime.roguecraft.RogueCraft;
 import fr.blueslime.roguecraft.arena.Arena;
 import fr.blueslime.roguecraft.arena.Arena.Role;
 import fr.blueslime.roguecraft.arena.ArenaPlayer;
-import fr.blueslime.roguecraft.arena.VirtualPlayer;
 import fr.blueslime.roguecraft.monsters.BasicMonster;
 import java.util.UUID;
+import net.samagames.network.client.GameArena;
+import net.samagames.network.client.GamePlayer;
 import net.zyuiop.coinsManager.CoinsManager;
 import net.zyuiop.statsapi.StatsApi;
 import org.bukkit.Bukkit;
@@ -26,11 +27,11 @@ public class RCEntityDamageByEntityEvent implements Listener
         {       
             event.setDamage(0.0D);
             
-            Arena arena = RogueCraft.getPlugin().getArenasManager().getPlayerArena(new VirtualPlayer((Player) event.getEntity()));
+            GameArena arena = RogueCraft.getPlugin().getArenasManager().getPlayerArena(event.getEntity().getUniqueId());
 
-            if(arena.isGameStarted())
+            if(arena.isStarted())
             {
-                if(arena.getPlayer(new VirtualPlayer((Player) event.getEntity())).getRole() == Role.PLAYER)
+                if(arena.getPlayers().contains(new GamePlayer(event.getEntity().getUniqueId())))
                 {
                     Player damaged = (Player) event.getEntity();
                     double lastDamage;
@@ -41,11 +42,11 @@ public class RCEntityDamageByEntityEvent implements Listener
                         
                         if(damager.hasMetadata("RC-MOBUUID"))
                         {
-                            BasicMonster monster = arena.getWave().getMonster(UUID.fromString(damager.getMetadata("RC-MOBUUID").get(0).asString()));
+                            BasicMonster monster = ((Arena)arena).getWave().getMonster(UUID.fromString(damager.getMetadata("RC-MOBUUID").get(0).asString()));
                             
                             if(monster != null)
                             {
-                                lastDamage = monster.getCalculatedDamage(event.getDamage(), arena.getWaveCount());
+                                lastDamage = monster.getCalculatedDamage(event.getDamage(), ((Arena)arena).getWaveCount());
                                 damaged.damage(lastDamage);
                             }
                         }
@@ -57,11 +58,11 @@ public class RCEntityDamageByEntityEvent implements Listener
                     
                     if(damaged.isDead())
                     {
-                        arena.loseMessage(damaged);
+                        ((Arena)arena).loseMessage(damaged);
                         
-                        if(arena.getActualPlayers() == 0)
+                        if(((Arena)arena).getActualPlayers() == 0)
                         {
-                            arena.finish();
+                            ((Arena)arena).finish();
                         }
                     }
                 }
@@ -73,7 +74,7 @@ public class RCEntityDamageByEntityEvent implements Listener
             
             if(damaged.hasMetadata("RC-ARENA"))
             {
-                Arena arena = RogueCraft.getPlugin().getArenasManager().getArena(UUID.fromString(damaged.getMetadata("RC-ARENA").get(0).asString()));
+                Arena arena = (Arena) RogueCraft.getPlugin().getArenasManager().getArena(UUID.fromString(damaged.getMetadata("RC-ARENA").get(0).asString()));
                 arena.getWave().monsterKilled();
                 
                 for(ArenaPlayer player : arena.getActualPlayersList())
