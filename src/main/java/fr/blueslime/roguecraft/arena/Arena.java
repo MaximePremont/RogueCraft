@@ -4,6 +4,7 @@ import fr.blueslime.roguecraft.Messages;
 import fr.blueslime.roguecraft.RogueCraft;
 import fr.blueslime.roguecraft.arena.Wave.WaveType;
 import fr.blueslime.roguecraft.randomizer.RandomizerBoss;
+import fr.blueslime.roguecraft.randomizer.RandomizerChestLoots;
 import fr.blueslime.roguecraft.randomizer.RandomizerMonster;
 import fr.blueslime.roguecraft.randomizer.RandomizerLogic;
 import java.io.File;
@@ -37,6 +38,7 @@ public class Arena extends GameArena
     private final RandomizerLogic randomizerLogic;
     private final RandomizerMonster randomizerMonster;
     private final RandomizerBoss randomizerBoss;
+    private final RandomizerChestLoots randomizerChestLoots;
     private final World world;
     private final ArrayList<ArenaPlayer> arenaPlayers;
     private final HashMap<WaveType, Area> areas;
@@ -58,6 +60,7 @@ public class Arena extends GameArena
         this.randomizerLogic = new RandomizerLogic();
         this.randomizerMonster = new RandomizerMonster();
         this.randomizerBoss = new RandomizerBoss();
+        this.randomizerChestLoots = new RandomizerChestLoots();
         this.areas = new HashMap<>();
         this.timer = null;
         this.waveCount = 1;
@@ -531,6 +534,11 @@ public class Arena extends GameArena
     public RandomizerBoss getBossRandomizer()
     {
         return this.randomizerBoss;
+    }
+    
+    public RandomizerChestLoots getChestLootsRandomizer()
+    {
+        return this.randomizerChestLoots;
     }
 
     public int getActualPlayers()

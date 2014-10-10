@@ -2,32 +2,26 @@ package fr.blueslime.roguecraft.arena;
 
 import com.google.common.collect.Lists;
 import com.google.common.math.IntMath;
-import com.sk89q.worldedit.CuboidClipboard;
-import com.sk89q.worldedit.EmptyClipboardException;
-import com.sk89q.worldedit.FilenameException;
-import com.sk89q.worldedit.LocalSession;
-import com.sk89q.worldedit.MaxChangedBlocksException;
-import com.sk89q.worldedit.bukkit.WorldEditPlugin;
-import com.sk89q.worldedit.data.DataException;
 import fr.blueslime.roguecraft.Messages;
-import fr.blueslime.roguecraft.RogueCraft;
 import fr.blueslime.roguecraft.arena.Wave.WaveType;
 import fr.blueslime.roguecraft.monsters.BasicBoss;
 import fr.blueslime.roguecraft.monsters.BasicMonster;
-import java.io.File;
-import java.io.IOException;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-import me.desht.dhutils.TerrainManager;
 import net.zyuiop.coinsManager.CoinsManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 public class WaveSystem
 {
@@ -132,6 +126,28 @@ public class WaveSystem
                 for(BasicMonster monster : monsterList)
                 {
                     monster.spawnMob(arena, wave.getWaveArea().getMobSpawns().get(i), arena.getWaveCount());
+                }
+            }
+        }
+        
+        for(Location chestLocation : wave.getWaveArea().getBonusChestSpawns())
+        {
+            Random rand = new Random();
+            boolean fill = rand.nextInt(2) == 1;
+            
+            if(fill)
+            {
+                Block block = arena.getWorld().getBlockAt(chestLocation);
+                block.setType(Material.CHEST);
+                Chest chest = (Chest) block.getState();
+                Inventory chestInv = chest.getBlockInventory();
+                HashMap<Integer, ItemStack> items = arena.getChestLootsRandomizer().randomLootsInSlots();
+                Iterator<Integer> keySet = items.keySet().iterator();
+                
+                while(keySet.hasNext())
+                {
+                    int slot = keySet.next();
+                    chestInv.setItem(slot, items.get(slot));
                 }
             }
         }
