@@ -8,6 +8,7 @@ import fr.blueslime.roguecraft.stuff.StuffManager;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import net.samagames.network.Network;
 import net.samagames.network.client.GamePlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -47,13 +48,10 @@ public class RogueCraft extends GamePlugin
             Bukkit.getPluginManager().disablePlugin(this);
         }
         
-        this.saveResource("MadWorld.nbs", false);
-        this.saveResource("PositiveForce.nbs", false);
-        this.saveResource("Sacrificial.nbs", false);
-        this.saveResource("VanillaTwilight.nbs", false);
-        
         this.arenasManager = new ArenasManager();
         this.arenasManager.loadArenas();
+    
+        Network.registerGame(this, this.comPort, this.bungeeName);
         
         this.stuffManager = new StuffManager();
         

@@ -2,11 +2,14 @@ package fr.blueslime.roguecraft.arena;
 
 import fr.blueslime.roguecraft.Messages;
 import fr.blueslime.roguecraft.RogueCraft;
+import fr.blueslime.roguecraft.arena.Wave.WaveType;
 import fr.blueslime.roguecraft.randomizer.RandomizerBoss;
 import fr.blueslime.roguecraft.randomizer.RandomizerMonster;
 import fr.blueslime.roguecraft.randomizer.RandomizerLogic;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.UUID;
 import net.samagames.network.Network;
 import net.samagames.network.client.GameArena;
@@ -30,19 +33,19 @@ public class Arena extends GameArena
 {
     public static enum Role { PLAYER, SPECTATOR }
     
+    private final WaveSystem waveSystem;
+    private final RandomizerLogic randomizerLogic;
+    private final RandomizerMonster randomizerMonster;
+    private final RandomizerBoss randomizerBoss;
+    private final World world;
+    private final ArrayList<ArenaPlayer> arenaPlayers;
+    private final HashMap<WaveType, Area> areas;
     private String theme;
     private BeginTimer timer;
-    private int minPlayers;
-    private WaveSystem waveSystem;
-    private RandomizerLogic randomizerLogic;
-    private RandomizerMonster randomizerMonster;
-    private RandomizerBoss randomizerBoss;
-    private ArrayList<Area> areas;
     private Area actualArea;
     private Wave wave;
     private int waveCount;
-    private World world;
-    private final ArrayList<ArenaPlayer> arenaPlayers;
+    private int minPlayers;
     
     private File dataSource;
     
@@ -55,6 +58,7 @@ public class Arena extends GameArena
         this.randomizerLogic = new RandomizerLogic();
         this.randomizerMonster = new RandomizerMonster();
         this.randomizerBoss = new RandomizerBoss();
+        this.areas = new HashMap<>();
         this.timer = null;
         this.waveCount = 1;
         this.maxPlayers = maxPlayers;
@@ -373,6 +377,11 @@ public class Arena extends GameArena
         Network.getManager().refreshArena(this);
     }
     
+    public void registerArea(WaveType type, Area area)
+    {
+        this.areas.put(type, area);
+    }
+    
     public void setMapName(String mapName)
     {
         this.mapName = mapName;
@@ -397,12 +406,7 @@ public class Arena extends GameArena
     {
         this.wave = wave;
     }
-    
-    public void setAreas(ArrayList<Area> areas)
-    {
-        this.areas = areas;
-    }
-    
+
     public void setActualArea(Area actualArea)
     {
         this.actualArea = actualArea;
@@ -489,9 +493,24 @@ public class Arena extends GameArena
         return null;
     }
     
-    public ArrayList<Area> getAreas()
+    public HashMap<WaveType, Area> getAreas()
     {
         return this.areas;
+    }
+    
+    public ArrayList<Area> getAreasByType(WaveType type)
+    {
+        ArrayList<Area> temp = new ArrayList<>();
+        Iterator<WaveType> keySet = this.areas.keySet().iterator();
+        
+        while(keySet.hasNext())
+        {
+            WaveType wType = keySet.next();
+            
+            if(wType == type) temp.add(this.areas.get(wType));
+        }
+        
+        return temp;
     }
     
     public WaveSystem getWaveSystem()

@@ -1,19 +1,28 @@
 package fr.blueslime.roguecraft.arena;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import fr.blueslime.roguecraft.arena.Wave.WaveType;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.UUID;
 import net.samagames.network.Network;
 import net.samagames.network.client.GameArena;
 import net.samagames.network.client.GameArenaManager;
 import net.samagames.network.json.Status;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.configuration.file.YamlConfiguration;
 
 public class ArenasManager extends GameArenaManager
 {
-    public void loadArenas()
+    public void loadArenas() throws FileNotFoundException, IOException
     {
         Bukkit.getLogger().info("Loading arenas...");
         
@@ -30,33 +39,60 @@ public class ArenasManager extends GameArenaManager
             for (File arena : folder.listFiles())
             {
                 Bukkit.getLogger().info("[ArenaLoad][" + w.getName() + "] Found arena " + arena.getName() + ", attempting to load.");
-                YamlConfiguration arenaData = YamlConfiguration.loadConfiguration(arena);
+                BufferedReader br = new BufferedReader(new FileReader(arena));
+                StringBuilder builder = new StringBuilder();
+                String currentLine;
                 
-                if (arenaData == null)
+                while((currentLine = br.readLine()) != null)
                 {
-                    Bukkit.getLogger().warning("[ArenaLoad][" + w.getName() + "] Failed to load " + arena.getName() + " !");
-                    continue;
+                    builder.append(currentLine);
                 }
                 
-                int maxPlayers = arenaData.getInt("max-players");
-                String mapName = arenaData.getString("mapname");
-                UUID arenaID = UUID.fromString(arenaData.getString("uuid", UUID.randomUUID().toString()));
+                JsonElement json = new JsonParser().parse(builder.toString());
+                JsonObject jsonObject = json.getAsJsonObject();
+
+                int maxPlayers = jsonObject.get("max-players").getAsInt();
+                String mapName = jsonObject.get("mapname").getAsString();
+                UUID arenaID;
+                
+                if(jsonObject.has("uuid")) { arenaID = UUID.fromString(jsonObject.get("uuid").getAsString()); }
+                else { arenaID = UUID.randomUUID(); }
                 
                 Arena arenaa = new Arena(w, maxPlayers, 0, mapName, arenaID);
                 arenaa.setDataSource(arena);
-                arenaData.set("uuid", arenaa.getArenaID().toString());
+                arenaa.setTheme(jsonObject.get("theme").getAsString());
+                arenaa.setMinPlayers(jsonObject.get("min-players").getAsInt());
                 
-                try
+                JsonArray jsonAreas = jsonObject.getAsJsonArray("areas");
+                
+                for(int i = 0; i < jsonAreas.size(); i++)
                 {
-                    arenaData.save(arena);
+                    JsonObject area = jsonAreas.get(i).getAsJsonObject();
+                    WaveType waveType = WaveType.valueOf(area.get("wave-type").getAsString());
+                    
+                    JsonObject jsonPlayersSpawn = area.getAsJsonObject("players-spawn");
+                    Location playersSpawn = new Location(arenaa.getWorld(), jsonPlayersSpawn.get("x").getAsDouble(), jsonPlayersSpawn.get("y").getAsDouble(), jsonPlayersSpawn.get("z").getAsDouble());
+                    
+                    JsonArray jsonMobSpawns = area.getAsJsonArray("mob-spawns");
+                    ArrayList<Location> mobSpawns = new ArrayList<>();
+                    
+                    for(int j = 0; j < jsonMobSpawns.size(); j++)
+                    {
+                        JsonObject mobSpawn = jsonMobSpawns.get(j).getAsJsonObject();
+                        mobSpawns.add(new Location(arenaa.getWorld(), mobSpawn.get("x").getAsDouble(), mobSpawn.get("y").getAsDouble(), mobSpawn.get("z").getAsDouble()));
+                    }
+                    
+                    JsonArray jsonBonusChestSpawns = area.getAsJsonArray("bonus-chest-spawns");
+                    ArrayList<Location> bonusChestSpawns = new ArrayList<>();
+                    
+                    for(int j = 0; j < jsonBonusChestSpawns.size(); j++)
+                    {
+                        JsonObject bonusChest = jsonBonusChestSpawns.get(j).getAsJsonObject();
+                        bonusChestSpawns.add(new Location(arenaa.getWorld(), bonusChest.get("x").getAsDouble(), bonusChest.get("y").getAsDouble(), bonusChest.get("z").getAsDouble()));
+                    }
+                    
+                    arenaa.registerArea(waveType, new Area(playersSpawn, mobSpawns, bonusChestSpawns));
                 }
-                catch (IOException e)
-                {
-                    e.printStackTrace();
-                }
-
-                arenaa.setTheme(arenaData.getString("theme"));
-                arenaa.setMinPlayers(arenaData.getInt("min-players"));
 
                 arenas.put(arenaa.getArenaID(), arenaa);
                 Bukkit.getLogger().info("[ArenaLoad][" + w.getName() + "] Successfully loaded arena " + arenaa.getArenaID() + " !");

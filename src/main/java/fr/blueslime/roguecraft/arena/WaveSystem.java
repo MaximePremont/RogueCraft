@@ -3,15 +3,12 @@ package fr.blueslime.roguecraft.arena;
 import com.google.common.collect.Lists;
 import com.google.common.math.IntMath;
 import com.sk89q.worldedit.CuboidClipboard;
-import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.EmptyClipboardException;
 import com.sk89q.worldedit.FilenameException;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
-import com.sk89q.worldedit.bukkit.BukkitWorld;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.data.DataException;
-import com.sk89q.worldedit.schematic.SchematicFormat;
 import fr.blueslime.roguecraft.Messages;
 import fr.blueslime.roguecraft.RogueCraft;
 import fr.blueslime.roguecraft.arena.Wave.WaveType;
@@ -24,8 +21,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import me.desht.dhutils.TerrainManager;
 import net.zyuiop.coinsManager.CoinsManager;
 import org.bukkit.Bukkit;
@@ -58,8 +53,8 @@ public class WaveSystem
             player.teleport(new Location(arena.getWorld(), 0.0D, 250.0D, 0.0D));
         }
         
-        Bukkit.getLogger().info("[RogueCraft-WaveSystem] Starting generating...");
-        arena.broadcastMessage(Messages.generatingArea);
+        Bukkit.getLogger().info("[RogueCraft-WaveSystem] Selecting random area...");
+        arena.broadcastMessage(Messages.preparingArea);
         
         WaveType waveType = WaveType.NORMAL;
         
@@ -68,87 +63,10 @@ public class WaveSystem
         
         Bukkit.getLogger().info("[RogueCraft-WaveSystem] Wave type is: " + waveType.name().toUpperCase());
         
-        File schematicsFolder = new File(RogueCraft.getPlugin().getDataFolder() + "schematics" + File.separator + this.arena.getMapName());
-        File[] schematics = schematicsFolder.listFiles();
+        ArrayList<Area> areas = arena.getAreasByType(waveType);
+        Collections.shuffle(areas, new Random(System.nanoTime()));
+        Area area = areas.get(0);
         
-        ArrayList<File> wantedSchematics = new ArrayList<>();
-        
-        for(File file : schematics)
-        {
-            if(waveType == WaveType.BOSS && file.getName().startsWith("boss_" + arena.getTheme().toLowerCase() + "_"))
-                wantedSchematics.add(file);
-            else if(waveType == WaveType.NORMAL && file.getName().startsWith("normal_" + arena.getTheme().toLowerCase() + "_"))
-                wantedSchematics.add(file);
-        }
-        
-        Collections.shuffle(wantedSchematics, new Random(System.nanoTime()));
-        File schematicTemp = wantedSchematics.get(0);
-        File schematic = new File(schematicTemp.getAbsolutePath().replace(".schematic", ""));
-        
-        Bukkit.getLogger().info("[RogueCraft-WaveSystem] Schematic selected is: " + schematic.getAbsolutePath());
-        
-        WorldEditPlugin we = RogueCraft.getPlugin().getWorldEditPlugin();
-        LocalSession lSession = new LocalSession(we.getWorldEdit().getConfiguration());
-        CuboidClipboard clipboard = null;
-        
-        try
-        {
-            clipboard = lSession.getClipboard();
-        }
-        catch (EmptyClipboardException ex)
-        {
-            Bukkit.getLogger().severe("[RogueCraft-WaveSystem] Can't destroy last area in world! > " + ex.getMessage());
-        }
-        
-        for(int x = 0; x < clipboard.getWidth(); x++)
-        {
-            for(int y = 0; y < clipboard.getHeight(); y++)
-            {
-                for(int z = 0; z < clipboard.getLength(); z++)
-                {
-                    arena.getWorld().getBlockAt(x, y, z).setType(Material.AIR);
-                }
-            }
-        }
-        
-        Bukkit.getLogger().info("[RogueCraft-WaveSystem] Building area in world...");
-        
-        TerrainManager tm = new TerrainManager(we, arena.getWorld());
-        
-        try
-        {
-            tm.loadSchematic(schematic, new Location(arena.getWorld(), 0.0D, 50.0D, 0.0D));
-        }
-        catch (FilenameException | DataException | IOException | MaxChangedBlocksException | EmptyClipboardException ex)
-        {
-            Bukkit.getLogger().severe("[RogueCraft-WaveSystem] Can't build area in world! > " + ex.getMessage());
-        }
-        
-        Bukkit.getLogger().info("[RogueCraft-WaveSystem] Area builded in world!");
-                
-        try
-        {
-            clipboard = lSession.getClipboard();
-        }
-        catch (EmptyClipboardException ex)
-        {
-            Bukkit.getLogger().severe("[RogueCraft-WaveSystem] Can't create area object in world! > " + ex.getMessage());
-        }
-        
-        ArrayList<Block> blocks = new ArrayList<>();
-        
-        for(int x = 0; x < clipboard.getWidth(); x++)
-        {
-            for(int y = 0; y < clipboard.getHeight(); y++)
-            {
-                for(int z = 0; z < clipboard.getLength(); z++)
-                {
-                    blocks.add(arena.getWorld().getBlockAt(x, y, z));
-                }
-            }
-        }
-        
-        Area area = new Area(blocks);
         Wave wave = new Wave(arena, waveType, arena.getWaveCount(), area);
         
         Bukkit.getLogger().info("[RogueCraft-WaveSystem] Creating mob list...");
