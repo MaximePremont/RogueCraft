@@ -52,6 +52,21 @@ public class LocalSword
         if(this.fireTier != 0)
             temp.addEnchantment(Enchantment.FIRE_ASPECT, this.fireTier);
         
+        switch(this.type)
+        {
+            case BASIC:
+                temp.getItemMeta().setDisplayName("Epée basique");
+                break;
+                
+            case POISONOUS:
+                temp.getItemMeta().setDisplayName("Epée empoisonnée");
+                break;
+                
+            case FREEZING:
+                temp.getItemMeta().setDisplayName("Epée de glace");
+                break;
+        }
+        
         return temp;
     }
     

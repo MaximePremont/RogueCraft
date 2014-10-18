@@ -18,6 +18,6 @@ public class CommandHelp
     
     private static void addCommandInfo(CommandSender sender, String commandName, String description)
     {
-        sender.sendMessage(ChatColor.DARK_AQUA + "[" + ChatColor.AQUA + "RogueCraft" + ChatColor.DARK_AQUA + "] " + ChatColor.WHITE + "/wb " + commandName + ": " + description + ChatColor.RESET);
+        sender.sendMessage(ChatColor.DARK_AQUA + "[" + ChatColor.AQUA + "RogueCraft" + ChatColor.DARK_AQUA + "] " + ChatColor.WHITE + "/rc " + commandName + ": " + description + ChatColor.RESET);
     }
 }

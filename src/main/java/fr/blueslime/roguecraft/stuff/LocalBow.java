@@ -54,6 +54,21 @@ public class LocalBow
         if(this.fireTier != 0)
             temp.addEnchantment(Enchantment.ARROW_FIRE, this.fireTier);
         
+        switch(this.type)
+        {
+            case BASIC:
+                temp.getItemMeta().setDisplayName("Arc basique");
+                break;
+                
+            case POISONOUS:
+                temp.getItemMeta().setDisplayName("Arc empoisonné");
+                break;
+                
+            case FREEZING:
+                temp.getItemMeta().setDisplayName("Arc de glace");
+                break;
+        }
+        
         return temp;
     }
     

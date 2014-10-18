@@ -8,6 +8,8 @@ import fr.blueslime.roguecraft.stuff.StuffManager;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.samagames.network.Network;
 import net.samagames.network.client.GamePlugin;
 import org.bukkit.Bukkit;
@@ -24,7 +26,6 @@ public class RogueCraft extends GamePlugin
     private StuffManager stuffManager;
     private String bungeeName;
     private int comPort;
-    private WorldEditPlugin worldEdit;
     
     public RogueCraft()
     {
@@ -40,16 +41,16 @@ public class RogueCraft extends GamePlugin
         this.comPort = getConfig().getInt("com-port");
         this.bungeeName = getConfig().getString("BungeeName");
         
-        this.worldEdit = (WorldEditPlugin) Bukkit.getPluginManager().getPlugin("WorldEdit");
-        
-        if(this.worldEdit == null)
-        {
-            Bukkit.getLogger().severe("[RogueCraft] The game cannot be played without WorldEdit!");
-            Bukkit.getPluginManager().disablePlugin(this);
-        }
-        
         this.arenasManager = new ArenasManager();
-        this.arenasManager.loadArenas();
+        
+        try
+        {
+            this.arenasManager.loadArenas();
+        }
+        catch (IOException ex)
+        {
+            Logger.getLogger(RogueCraft.class.getName()).log(Level.SEVERE, null, ex);
+        }
     
         Network.registerGame(this, this.comPort, this.bungeeName);
         
@@ -135,11 +136,6 @@ public class RogueCraft extends GamePlugin
     public String getBungeeName()
     {
         return this.bungeeName;
-    }
-    
-    public WorldEditPlugin getWorldEditPlugin()
-    {
-        return this.worldEdit;
     }
 
     public static RogueCraft getPlugin()

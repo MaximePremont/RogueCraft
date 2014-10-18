@@ -11,12 +11,17 @@ import net.samagames.network.client.GamePlayer;
 import net.zyuiop.coinsManager.CoinsManager;
 import net.zyuiop.statsapi.StatsApi;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 public class RCEntityDamageByEntityEvent implements Listener
 {
@@ -70,7 +75,7 @@ public class RCEntityDamageByEntityEvent implements Listener
         }
         else
         {
-            Entity damaged = event.getEntity();
+            LivingEntity damaged = (LivingEntity) event.getEntity();
             
             if(damaged.hasMetadata("RC-ARENA"))
             {
@@ -87,6 +92,43 @@ public class RCEntityDamageByEntityEvent implements Listener
                     else
                     {
                         StatsApi.increaseStat(player.getPlayer().getPlayerID(), "roguecraft", "xp", 5);
+                    }
+                }
+                
+                if(event.getDamager() instanceof Player)
+                {
+                    Player damager = (Player) event.getDamager();
+                    
+                    if(damager.getItemInHand() != null)
+                    {
+                        ItemStack stack = damager.getItemInHand();
+                        
+                        if(stack.getType() == Material.IRON_SWORD)
+                        {
+                            switch (stack.getItemMeta().getDisplayName())
+                            {
+                                case "Epée empoisonnée":
+                                    damaged.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 120, 1));
+                                    break;
+                                    
+                                case "Epée de glace":
+                                    damaged.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 120, 1));
+                                    break;
+                            }
+                        }
+                        else if(stack.getType() == Material.BOW)
+                        {
+                            switch (stack.getItemMeta().getDisplayName())
+                            {
+                                case "Arc empoisonné":
+                                    damaged.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 120, 1));
+                                    break;
+                                    
+                                case "Arc de glace":
+                                    damaged.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 120, 1));
+                                    break;
+                            }
+                        }
                     }
                 }
             }

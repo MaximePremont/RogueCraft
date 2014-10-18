@@ -42,6 +42,21 @@ public class LocalWand
         if(this.sharpnessTier != 0)
             temp.addEnchantment(Enchantment.DAMAGE_ALL, this.sharpnessTier);
         
+        switch(this.type)
+        {
+            case BASIC:
+                temp.getItemMeta().setDisplayName("Baguette basique");
+                break;
+                
+            case STRENTH:
+                temp.getItemMeta().setDisplayName("Baguette de force");
+                break;
+                
+            case HEALING:
+                temp.getItemMeta().setDisplayName("Baguette de santé");
+                break;
+        }
+        
         return temp;
     }
     

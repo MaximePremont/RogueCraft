@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import net.zyuiop.coinsManager.CoinsManager;
+import net.zyuiop.statsapi.StatsApi;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -162,6 +163,15 @@ public class WaveSystem
         for(ArenaPlayer player : arena.getActualPlayersList())
         {
             CoinsManager.creditJoueur(player.getPlayer().getPlayerID(), 10, true);
+            
+            if(arena.getWave().getWaveType() == WaveType.NORMAL)
+            {
+                StatsApi.increaseStat(player.getPlayer().getPlayerID(), "roguecraft", "xp", 50);
+            }
+            else
+            {
+                StatsApi.increaseStat(player.getPlayer().getPlayerID(), "roguecraft", "xp", 100);
+            }
         }
         
         this.endWaveTimer = new EndWaveTimer(arena);
