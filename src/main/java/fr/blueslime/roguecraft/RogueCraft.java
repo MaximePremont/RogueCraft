@@ -22,7 +22,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 public class RogueCraft extends GamePlugin
 {
     private static RogueCraft plugin;
-    private ArenasManager arenasManager;
     private StuffManager stuffManager;
     private String bungeeName;
     private int comPort;
@@ -35,25 +34,24 @@ public class RogueCraft extends GamePlugin
     @Override
     public void onEnable()
     {
+        super.onEnable();
         plugin = this;
         
         this.saveDefaultConfig();
         this.comPort = getConfig().getInt("com-port");
         this.bungeeName = getConfig().getString("BungeeName");
         
-        this.arenasManager = new ArenasManager();
+        this.arenaManager = new ArenasManager();
         
         try
         {
-            this.arenasManager.loadArenas();
+            ((ArenasManager) this.arenaManager).loadArenas();
         }
         catch (IOException ex)
         {
             Logger.getLogger(RogueCraft.class.getName()).log(Level.SEVERE, null, ex);
         }
-    
-        Network.registerGame(this, this.comPort, this.bungeeName);
-        
+            
         this.stuffManager = new StuffManager();
         
         this.getCommand("rc").setExecutor(new CommandRogueCraft());
@@ -61,6 +59,8 @@ public class RogueCraft extends GamePlugin
         this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
 
         this.registerEvents();
+        
+        Network.registerGame(this, this.comPort, this.bungeeName);
     }
 
     @Override
@@ -94,7 +94,7 @@ public class RogueCraft extends GamePlugin
             out.writeUTF("Connect");
             out.writeUTF("lobby");
         }
-        catch (IOException e) {}
+        catch (IOException ex) {}
         
         player.sendPluginMessage(this, "BungeeCord", b.toByteArray());
         
@@ -106,6 +106,12 @@ public class RogueCraft extends GamePlugin
                 player.kickPlayer("Une erreur s'est produite lors de la tentative de kick.");
             }
         }, 3*20L);
+    }
+    
+    public void kickPlayer(final Player player, String reason)
+    {
+        player.sendMessage(ChatColor.RED + reason);
+        this.kickPlayer(player);
     }
 
     public ItemStack getLeaveItem()
@@ -120,7 +126,7 @@ public class RogueCraft extends GamePlugin
     
     public ArenasManager getArenasManager()
     {
-        return this.arenasManager;
+        return (ArenasManager) this.arenaManager;
     }
 
     public StuffManager getStuffManager()

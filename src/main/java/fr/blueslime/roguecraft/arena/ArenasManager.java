@@ -52,6 +52,7 @@ public class ArenasManager extends GameArenaManager
                 JsonObject jsonObject = json.getAsJsonObject();
 
                 int maxPlayers = jsonObject.get("max-players").getAsInt();
+                int minPlayers = jsonObject.get("min-players").getAsInt();
                 String mapName = jsonObject.get("mapname").getAsString();
                 UUID arenaID;
                 
@@ -61,7 +62,7 @@ public class ArenasManager extends GameArenaManager
                 Arena arenaa = new Arena(w, maxPlayers, 0, mapName, arenaID);
                 arenaa.setDataSource(arena);
                 arenaa.setTheme(jsonObject.get("theme").getAsString());
-                arenaa.setMinPlayers(jsonObject.get("min-players").getAsInt());
+                arenaa.setMinPlayers(minPlayers);
                 
                 JsonArray jsonAreas = jsonObject.getAsJsonArray("areas");
                 

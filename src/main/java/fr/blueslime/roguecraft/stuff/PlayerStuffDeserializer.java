@@ -42,7 +42,7 @@ public class PlayerStuffDeserializer implements JsonDeserializer<PlayerStuff>
         
         /** ------------------------------------------- **/
         
-        JsonArray jsonLeggingValues = jsonObject.get("legging").getAsJsonArray();
+        JsonArray jsonLeggingValues = jsonObject.get("leggings").getAsJsonArray();
         
         int[] leggingValues = new int[jsonLeggingValues.size()];
         

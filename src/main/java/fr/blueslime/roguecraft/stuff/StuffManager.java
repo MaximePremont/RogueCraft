@@ -12,7 +12,7 @@ public class StuffManager
     public ItemStack[] createArmor(ArenaPlayer player)
     {
         PlayerStuff stuff = player.getPlayerStuff();
-        ItemStack[] temp = new ItemStack[3];
+        ItemStack[] temp = new ItemStack[4];
 
         temp[0] = new LocalArmorPiece(1, stuff.getHelmet()[0], stuff.getHelmet()[1], stuff.getHelmet()[2], stuff.getHelmet()[3]).build();
         temp[1] = new LocalArmorPiece(2, stuff.getChestplate()[0], stuff.getChestplate()[1], stuff.getChestplate()[2], stuff.getChestplate()[3]).build();

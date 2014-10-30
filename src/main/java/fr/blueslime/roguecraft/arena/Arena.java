@@ -1,5 +1,6 @@
 package fr.blueslime.roguecraft.arena;
 
+import de.inventivegames.util.title.TitleManager;
 import fr.blueslime.roguecraft.Messages;
 import fr.blueslime.roguecraft.RogueCraft;
 import fr.blueslime.roguecraft.arena.Wave.WaveType;
@@ -84,67 +85,75 @@ public class Arena extends GameArena
             return ret;
         
         Player player = Bukkit.getPlayer(playerID);
+        ArenaPlayer aPlayer = new ArenaPlayer(new GamePlayer(player));
         
-        player.sendMessage(Messages.joinArena);
-        player.teleport(new Location(this.world, 0, 70, 0));
-        this.arenaPlayers.add(new ArenaPlayer(new GamePlayer(player)));
-        
-        this.broadcastMessage(Messages.playerJoinedArena.replace("${PSEUDO}", player.getName()).replace("${JOUEURS}", "" + players.size()).replace("${JOUEURS_MAX}", "" + this.maxPlayers));
-    
-        refreshPlayers(true);
-        setupPlayer(player);
-        
-        for(GameArena arena : RogueCraft.getPlugin().getArenasManager().getArenas().values())
+        if(aPlayer.hasClass())
         {
-            for(ArenaPlayer pPlayer : ((Arena)arena).getArenaPlayers())
-            {                    
-                if(pPlayer.getPlayer().getPlayer() != null)
-                {
-                    pPlayer.getPlayer().getPlayer().getPlayer().getPlayer().hidePlayer(player);
-                    player.hidePlayer(pPlayer.getPlayer().getPlayer().getPlayer().getPlayer());
+            player.sendMessage(Messages.joinArena);
+            player.teleport(new Location(this.world, 0, 70, 0));
+            this.arenaPlayers.add(aPlayer);
+
+            this.broadcastMessage(Messages.playerJoinedArena.replace("${PSEUDO}", player.getName()).replace("${JOUEURS}", "" + players.size()).replace("${JOUEURS_MAX}", "" + this.maxPlayers));
+
+            refreshPlayers(true);
+            setupPlayer(player);
+
+            for(GameArena arena : RogueCraft.getPlugin().getArenasManager().getArenas().values())
+            {
+                for(ArenaPlayer pPlayer : ((Arena)arena).getArenaPlayers())
+                {                    
+                    if(pPlayer.getPlayer().getPlayer() != null)
+                    {
+                        pPlayer.getPlayer().getPlayer().getPlayer().getPlayer().hidePlayer(player);
+                        player.hidePlayer(pPlayer.getPlayer().getPlayer().getPlayer().getPlayer());
+                    }
                 }
             }
-        }
-        
-        ArrayList<ArenaPlayer> removal = new ArrayList<>();
-        
-        for(ArenaPlayer pPlayer : this.arenaPlayers)
-        {            
-            if(pPlayer.getPlayer().getPlayer() == null)
-            {
-                removal.add(pPlayer);
-                continue;
+
+            ArrayList<ArenaPlayer> removal = new ArrayList<>();
+
+            for(ArenaPlayer pPlayer : this.arenaPlayers)
+            {            
+                if(pPlayer.getPlayer().getPlayer() == null)
+                {
+                    removal.add(pPlayer);
+                    continue;
+                }
+
+                pPlayer.getPlayer().getPlayer().getPlayer().getPlayer().showPlayer(player);
+                player.showPlayer(pPlayer.getPlayer().getPlayer().getPlayer().getPlayer());
             }
-            
-            pPlayer.getPlayer().getPlayer().getPlayer().getPlayer().showPlayer(player);
-            player.showPlayer(pPlayer.getPlayer().getPlayer().getPlayer().getPlayer());
+
+            for (ArenaPlayer pPlayer : removal)
+            {
+                this.arenaPlayers.remove(pPlayer);
+            }
+
+            player.getInventory().setItem(8, RogueCraft.getPlugin().getLeaveItem());
+
+            ItemStack rules = new ItemStack(Material.WRITTEN_BOOK, 1);
+            BookMeta rulesMeta = (BookMeta) rules.getItemMeta();
+
+            rulesMeta.setAuthor("SamaGames - BlueSlime");
+            rulesMeta.setTitle("Règles du jeu");
+
+            ArrayList<String> pages = new ArrayList<>();
+            pages.add(ChatColor.GOLD + "Bienvenue sur " + ChatColor.DARK_GREEN + "RogueCraft ! \n\n > Sommaire : " + ChatColor.BLACK + "\n\n P.2: Principe du jeu \n P.3: Armes \n\n" + ChatColor.RED + "Pour une meilleure expérience de jeu, désactiver les nuages.\n\n" + ChatColor.BLACK + "Jeu : BlueSlime\nMaps : Amalgar");
+            pages.add(ChatColor.DARK_GREEN + "Principe du jeu :" + ChatColor.BLACK + "\n\nSwag");
+            pages.add(ChatColor.DARK_GREEN + "Armes :" + ChatColor.BLACK + "\n\nSwag");
+
+            rulesMeta.setPages(pages);
+            rules.setItemMeta(rulesMeta);
+
+            player.getInventory().setItem(0, rules);
+            player.sendMessage(ChatColor.GOLD + "\nBienvenue sur " + ChatColor.AQUA + "RogueCraft" + ChatColor.GOLD + " !");
+
+            Network.getManager().refreshArena(this);
         }
-        
-        for (ArenaPlayer pPlayer : removal)
+        else
         {
-            this.arenaPlayers.remove(pPlayer);
+            RogueCraft.getPlugin().kickPlayer(player, "Vous devez avoir créé une classe pour pouvoir jouer à ce jeu.");
         }
-        
-        player.getInventory().setItem(8, RogueCraft.getPlugin().getLeaveItem());
-        
-        ItemStack rules = new ItemStack(Material.WRITTEN_BOOK, 1);
-        BookMeta rulesMeta = (BookMeta) rules.getItemMeta();
-        
-        rulesMeta.setAuthor("SamaGames - BlueSlime");
-        rulesMeta.setTitle("Règles du jeu");
-        
-        ArrayList<String> pages = new ArrayList<>();
-        pages.add(ChatColor.GOLD + "Bienvenue sur " + ChatColor.DARK_GREEN + "RogueCraft ! \n\n > Sommaire : " + ChatColor.BLACK + "\n\n P.2: Principe du jeu \n P.3: Armes \n\n" + ChatColor.RED + "Pour une meilleure expérience de jeu, désactiver les nuages.\n\n" + ChatColor.BLACK + "Jeu : BlueSlime\nMaps : Amalgar");
-        pages.add(ChatColor.DARK_GREEN + "Principe du jeu :" + ChatColor.BLACK + "\n\nSwag");
-        pages.add(ChatColor.DARK_GREEN + "Armes :" + ChatColor.BLACK + "\n\nSwag");
-    
-        rulesMeta.setPages(pages);
-        rules.setItemMeta(rulesMeta);
-        
-        player.getInventory().setItem(0, rules);
-        player.sendMessage(ChatColor.GOLD + "\nBienvenue sur " + ChatColor.AQUA + "RogueCraft" + ChatColor.GOLD + " !");
-    
-        Network.getManager().refreshArena(this);
         
         return "OK";
     }
@@ -153,7 +162,7 @@ public class Arena extends GameArena
     {
         for(ArenaPlayer player : this.arenaPlayers)
         {
-            player.getPlayer().getPlayer().sendMessage(Messages.PLUGIN_TAG + message);
+            player.getPlayer().getPlayer().sendMessage(message);
         }
     }
     
@@ -243,6 +252,9 @@ public class Arena extends GameArena
             player.giveStuff();
             
             StatsApi.increaseStat(p, "roguecraft", "played_games", 1);
+            
+            TitleManager.sendTitle(p, "{\"text\":\"\",\"extra\":[{\"text\":\"RogueCraft\",\"color\":\"aqua\"}]}");
+            TitleManager.sendSubTitle(p, "{\"text\":\"\",\"extra\":[{\"text\":\"Jeu créé par BlueSlime\",\"color\":\"aqua\"}]}");
         }
         
         if(this.timer != null)

@@ -8,6 +8,7 @@ import fr.blueslime.roguecraft.stuff.PlayerStuff;
 import fr.blueslime.roguecraft.stuff.PlayerStuffDeserializer;
 import fr.blueslime.roguecraft.stuff.StuffManager.PlayerClass;
 import net.samagames.network.client.GamePlayer;
+import net.zyuiop.MasterBundle.FastJedis;
 import net.zyuiop.coinsManager.CoinsManager;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -19,6 +20,7 @@ import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
+import redis.clients.jedis.ShardedJedis;
 
 public class ArenaPlayer
 {
@@ -136,7 +138,7 @@ public class ArenaPlayer
     {
         return this.role;
     }
-    
+        
     public PlayerClass getPlayerClass()
     {
         return this.pClass;
@@ -160,5 +162,19 @@ public class ArenaPlayer
     public ItemStack getWeapon()
     {
         return this.weapon;
+    }
+    
+    public boolean hasClass()
+    {
+        ShardedJedis redis = FastJedis.jedis();
+            
+        if(redis.exists("roguecraft:properties:" + this.player.getPlayerID()))
+        {
+            return !redis.get("roguecraft:properties:" + this.player.getPlayerID()).equals("");
+        }
+        else
+        {
+            return false;
+        }
     }
 }

@@ -90,7 +90,7 @@ public class RandomizerMonster
     
     public ItemStack[] randomArmor(int waveCount)
     {
-        ItemStack[] armor = new ItemStack[3];
+        ItemStack[] armor = new ItemStack[4];
         RGB color = this.randomColor();
         HashMap<Enchantment, Integer> enchants = this.randomEnchantmentForArmor(waveCount);
         
@@ -115,12 +115,15 @@ public class RandomizerMonster
     
     private ItemStack applyEnchantments(ItemStack stack, HashMap<Enchantment, Integer> enchantments)
     {
-        Iterator<Enchantment> keySet = enchantments.keySet().iterator();
-        
-        while(keySet.hasNext())
+        if(stack != null)
         {
-            Enchantment enchantment = keySet.next();
-            stack.addEnchantment(enchantment, enchantments.get(enchantment));
+            Iterator<Enchantment> keySet = enchantments.keySet().iterator();
+
+            while(keySet.hasNext())
+            {
+                Enchantment enchantment = keySet.next();
+                stack.addUnsafeEnchantment(enchantment, enchantments.get(enchantment));
+            }
         }
         
         return stack;
