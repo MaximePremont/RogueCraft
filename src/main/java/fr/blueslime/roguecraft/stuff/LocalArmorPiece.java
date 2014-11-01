@@ -25,14 +25,16 @@ public class LocalArmorPiece
     {
         ItemStack temp = new ItemStack(this.determineMaterial(), 1);
         
+        temp.addUnsafeEnchantment(Enchantment.DURABILITY, 10);
+        
         if(this.pTier != 0)
-            temp.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, this.pTier);
+            temp.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, this.pTier);
         
         if(this.firePTier != 0)
-            temp.addEnchantment(Enchantment.PROTECTION_FIRE, this.firePTier);
+            temp.addUnsafeEnchantment(Enchantment.PROTECTION_FIRE, this.firePTier);
         
         if(this.blastPTier != 0)
-            temp.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, this.blastPTier);
+            temp.addUnsafeEnchantment(Enchantment.PROTECTION_EXPLOSIONS, this.blastPTier);
         
         return temp;
     }

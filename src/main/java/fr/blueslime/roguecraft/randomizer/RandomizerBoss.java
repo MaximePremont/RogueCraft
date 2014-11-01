@@ -2,9 +2,7 @@ package fr.blueslime.roguecraft.randomizer;
 
 import fr.blueslime.roguecraft.arena.Arena;
 import fr.blueslime.roguecraft.monsters.BasicBoss;
-import fr.blueslime.roguecraft.monsters.BossNames;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Random;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
@@ -53,10 +51,6 @@ public class RandomizerBoss
             head.setItemMeta(headMeta);
             boss.setArmorHelmet(head);
         }
-        else
-        {
-            boss.setCustomName(BossNames.randomName());
-        }
         
         boss.setWeapon(this.randomWeapon(arena.getWaveCount()));
         
@@ -76,7 +70,7 @@ public class RandomizerBoss
     
     public ItemStack randomWeapon(int waveCount)
     {
-        ItemStack weapon = new ItemStack(Material.AIR, 1);   
+        ItemStack weapon = new ItemStack(Material.IRON_SWORD, 1);   
         return this.applyEnchantments(weapon, this.randomEnchantmentForWeapon(waveCount));
     }
     
@@ -85,16 +79,16 @@ public class RandomizerBoss
         HashMap<Enchantment, Integer> enchantList = new HashMap<>();
         
         if(waveCount >= 30) { enchantList.put(Enchantment.PROTECTION_ENVIRONMENTAL, 12); }
-        else if(waveCount >= 20) { enchantList.put(Enchantment.PROTECTION_ENVIRONMENTAL, 10); }
-        else if(waveCount >= 15) { enchantList.put(Enchantment.PROTECTION_ENVIRONMENTAL, 8); }
-        else if(waveCount >= 10) { enchantList.put(Enchantment.PROTECTION_ENVIRONMENTAL, 6); }
-        else if(waveCount >= 5) { enchantList.put(Enchantment.PROTECTION_ENVIRONMENTAL, 4); }
+        else if(waveCount >= 20) { enchantList.put(Enchantment.PROTECTION_ENVIRONMENTAL, 9); }
+        else if(waveCount >= 15) { enchantList.put(Enchantment.PROTECTION_ENVIRONMENTAL, 7); }
+        else if(waveCount >= 10) { enchantList.put(Enchantment.PROTECTION_ENVIRONMENTAL, 5); }
+        else if(waveCount >= 5) { enchantList.put(Enchantment.PROTECTION_ENVIRONMENTAL, 3); }
                 
         if(waveCount >= 10) { enchantList.put(Enchantment.THORNS, 1); }
         else if(waveCount >= 20) { enchantList.put(Enchantment.THORNS, 2); }
         else if(waveCount >= 30) { enchantList.put(Enchantment.THORNS, 3); }
         
-        enchantList.put(Enchantment.DURABILITY, Integer.MAX_VALUE);
+        enchantList.put(Enchantment.DURABILITY, 10);
         
         return enchantList;
     }
@@ -115,7 +109,7 @@ public class RandomizerBoss
         else if(waveCount >= 20) { enchantList.put(Enchantment.KNOCKBACK, 2); }
         else if(waveCount >= 30) { enchantList.put(Enchantment.KNOCKBACK, 3); }
         
-        enchantList.put(Enchantment.DURABILITY, Integer.MAX_VALUE);
+        enchantList.put(Enchantment.DURABILITY, 10);
         
         return enchantList;
     }
@@ -137,12 +131,10 @@ public class RandomizerBoss
     {        
         if(stack != null)
         {
-            Iterator<Enchantment> keySet = enchantments.keySet().iterator();
-
-            while(keySet.hasNext())
+            for(Enchantment enchantment : enchantments.keySet())
             {
-                Enchantment enchantment = keySet.next();
-                stack.addUnsafeEnchantment(enchantment, enchantments.get(enchantment));
+                int lvl = enchantments.get(enchantment);
+                stack.addUnsafeEnchantment(enchantment, lvl);
             }
         }
         

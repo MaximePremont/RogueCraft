@@ -4,115 +4,85 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import fr.blueslime.roguecraft.RogueCraft;
 import fr.blueslime.roguecraft.arena.Wave.WaveType;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.UUID;
-import net.samagames.network.Network;
-import net.samagames.network.client.GameArena;
-import net.samagames.network.client.GameArenaManager;
-import net.samagames.network.json.Status;
+import net.samagames.gameapi.GameAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.World;
 
-public class ArenasManager extends GameArenaManager
-{
-    public void loadArenas() throws FileNotFoundException, IOException
+public class ArenasManager
+{    
+    public Arena loadArena(File file)
     {
-        Bukkit.getLogger().info("Loading arenas...");
-        
-        for (World w : Bukkit.getWorlds())
+        try
         {
-            File folder = new File(w.getWorldFolder(), "arenas");
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            StringBuilder builder = new StringBuilder();
+            String currentLine;
             
-            if (!folder.exists())
+            while((currentLine = br.readLine()) != null)
             {
-                Bukkit.getLogger().warning("Arenas load failed for world " + w.getName() + " : folder " + folder.getAbsolutePath() + " not found !");
-                continue;
-            }
-
-            for (File arena : folder.listFiles())
-            {
-                Bukkit.getLogger().info("[ArenaLoad][" + w.getName() + "] Found arena " + arena.getName() + ", attempting to load.");
-                BufferedReader br = new BufferedReader(new FileReader(arena));
-                StringBuilder builder = new StringBuilder();
-                String currentLine;
-                
-                while((currentLine = br.readLine()) != null)
-                {
-                    builder.append(currentLine);
-                }
-                
-                JsonElement json = new JsonParser().parse(builder.toString());
-                JsonObject jsonObject = json.getAsJsonObject();
-
-                int maxPlayers = jsonObject.get("max-players").getAsInt();
-                int minPlayers = jsonObject.get("min-players").getAsInt();
-                String mapName = jsonObject.get("mapname").getAsString();
-                UUID arenaID;
-                
-                if(jsonObject.has("uuid")) { arenaID = UUID.fromString(jsonObject.get("uuid").getAsString()); }
-                else { arenaID = UUID.randomUUID(); }
-                
-                Arena arenaa = new Arena(w, maxPlayers, 0, mapName, arenaID);
-                arenaa.setDataSource(arena);
-                arenaa.setTheme(jsonObject.get("theme").getAsString());
-                arenaa.setMinPlayers(minPlayers);
-                
-                JsonArray jsonAreas = jsonObject.getAsJsonArray("areas");
-                
-                for(int i = 0; i < jsonAreas.size(); i++)
-                {
-                    JsonObject area = jsonAreas.get(i).getAsJsonObject();
-                    WaveType waveType = WaveType.valueOf(area.get("wave-type").getAsString());
-                    
-                    JsonObject jsonPlayersSpawn = area.getAsJsonObject("players-spawn");
-                    Location playersSpawn = new Location(arenaa.getWorld(), jsonPlayersSpawn.get("x").getAsDouble(), jsonPlayersSpawn.get("y").getAsDouble(), jsonPlayersSpawn.get("z").getAsDouble());
-                    
-                    JsonArray jsonMobSpawns = area.getAsJsonArray("mob-spawns");
-                    ArrayList<Location> mobSpawns = new ArrayList<>();
-                    
-                    for(int j = 0; j < jsonMobSpawns.size(); j++)
-                    {
-                        JsonObject mobSpawn = jsonMobSpawns.get(j).getAsJsonObject();
-                        mobSpawns.add(new Location(arenaa.getWorld(), mobSpawn.get("x").getAsDouble(), mobSpawn.get("y").getAsDouble(), mobSpawn.get("z").getAsDouble()));
-                    }
-                    
-                    JsonArray jsonBonusChestSpawns = area.getAsJsonArray("bonus-chest-spawns");
-                    ArrayList<Location> bonusChestSpawns = new ArrayList<>();
-                    
-                    for(int j = 0; j < jsonBonusChestSpawns.size(); j++)
-                    {
-                        JsonObject bonusChest = jsonBonusChestSpawns.get(j).getAsJsonObject();
-                        bonusChestSpawns.add(new Location(arenaa.getWorld(), bonusChest.get("x").getAsDouble(), bonusChest.get("y").getAsDouble(), bonusChest.get("z").getAsDouble()));
-                    }
-                    
-                    arenaa.registerArea(waveType, new Area(playersSpawn, mobSpawns, bonusChestSpawns));
-                }
-
-                arenas.put(arenaa.getArenaID(), arenaa);
-                Bukkit.getLogger().info("[ArenaLoad][" + w.getName() + "] Successfully loaded arena " + arenaa.getArenaID() + " !");
+                builder.append(currentLine);
             }
             
-            Bukkit.getLogger().info("[ArenaLoad] Loaded world " + w.getName());
+            JsonElement json = new JsonParser().parse(builder.toString());
+            JsonObject jsonObject = json.getAsJsonObject();
+            
+            UUID arenaID;
+            
+            if(jsonObject.has("uuid")) { arenaID = UUID.fromString(jsonObject.get("uuid").getAsString()); }
+            else { arenaID = UUID.randomUUID(); }
+            
+            Arena arena = new Arena(arenaID, Bukkit.getWorlds().get(0));
+            arena.setMapName(jsonObject.get("mapname").getAsString());
+            
+            JsonArray jsonAreas = jsonObject.getAsJsonArray("areas");
+            
+            for(int i = 0; i < jsonAreas.size(); i++)
+            {
+                JsonObject area = jsonAreas.get(i).getAsJsonObject();
+                WaveType waveType = WaveType.valueOf(area.get("wave-type").getAsString());
+                
+                JsonObject jsonPlayersSpawn = area.getAsJsonObject("players-spawn");
+                Location playersSpawn = new Location(arena.getWorld(), jsonPlayersSpawn.get("x").getAsDouble(), jsonPlayersSpawn.get("y").getAsDouble(), jsonPlayersSpawn.get("z").getAsDouble());
+                
+                JsonArray jsonMobSpawns = area.getAsJsonArray("mob-spawns");
+                ArrayList<Location> mobSpawns = new ArrayList<>();
+                
+                for(int j = 0; j < jsonMobSpawns.size(); j++)
+                {
+                    JsonObject mobSpawn = jsonMobSpawns.get(j).getAsJsonObject();
+                    mobSpawns.add(new Location(arena.getWorld(), mobSpawn.get("x").getAsDouble(), mobSpawn.get("y").getAsDouble(), mobSpawn.get("z").getAsDouble()));
+                }
+                
+                JsonArray jsonBonusChestSpawns = area.getAsJsonArray("bonus-chest-spawns");
+                ArrayList<Location> bonusChestSpawns = new ArrayList<>();
+                
+                for(int j = 0; j < jsonBonusChestSpawns.size(); j++)
+                {
+                    JsonObject bonusChest = jsonBonusChestSpawns.get(j).getAsJsonObject();
+                    bonusChestSpawns.add(new Location(arena.getWorld(), bonusChest.get("x").getAsDouble(), bonusChest.get("y").getAsDouble(), bonusChest.get("z").getAsDouble()));
+                }
+                
+                arena.registerArea(waveType, new Area(playersSpawn, mobSpawns, bonusChestSpawns));
+            }
+            
+            GameAPI.registerArena(arena);
+            Bukkit.getLogger().info("[ArenaLoad] Successfully loaded arena " + arena.getUUID() + " !");
+            
+            return arena;
         }
-        
-        Bukkit.getLogger().info("[ArenaLoad] Task ended. " + arenas.size() + " arenas loaded.");
-    }
-
-    @Override
-    public void disable()
-    {
-        for(GameArena arena : this.arenas.values())
+        catch (IOException ex)
         {
-            arena.setStatus(Status.Stopping);
+            ex.printStackTrace();
         }
         
-        Network.getManager().sendArenas();
+        return null;
     }
 }

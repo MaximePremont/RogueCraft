@@ -40,7 +40,7 @@ public class LocalWand
         ItemStack temp = new ItemStack(Material.BLAZE_ROD, 1);
                 
         if(this.sharpnessTier != 0)
-            temp.addEnchantment(Enchantment.DAMAGE_ALL, this.sharpnessTier);
+            temp.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, this.sharpnessTier);
         
         switch(this.type)
         {

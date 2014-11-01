@@ -4,6 +4,7 @@ import fr.blueslime.roguecraft.monsters.BasicBoss;
 import fr.blueslime.roguecraft.monsters.BasicMonster;
 import java.util.ArrayList;
 import java.util.UUID;
+import org.bukkit.Bukkit;
 
 public class Wave
 {
@@ -16,7 +17,7 @@ public class Wave
     private int monsterCount;
     private boolean locked;
     
-    private ArrayList<BasicMonster> monsters;
+    private final ArrayList<BasicMonster> monsters;
     private BasicBoss boss;
     
     public Wave(Arena arena, WaveType waveType, int waveNumber, Area waveArea)
@@ -26,6 +27,8 @@ public class Wave
         this.waveNumber = waveNumber;
         this.waveArea = waveArea;
         this.locked = false;
+        
+        this.monsters = new ArrayList<>();
     }
     
     public void registerMob(BasicMonster monster)
@@ -42,10 +45,19 @@ public class Wave
     
     public void monsterKilled()
     {
+        Bukkit.getLogger().info("[RogueCraft] A monster was killed.");
+        
         this.monsterCount -= 1;
+        
+        for(ArenaPlayer player : this.arena.getArenaPlayers())
+        {
+            player.updateScoreboard();
+        }
         
         if(this.monsterCount == 0 && !locked)
         {
+            Bukkit.getLogger().info("[RogueCraft] No monster is alive! Ending wave.");
+            
             this.locked = true;
             this.arena.getWaveSystem().end();
         }

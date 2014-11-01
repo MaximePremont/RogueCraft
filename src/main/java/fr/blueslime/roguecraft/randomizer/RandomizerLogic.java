@@ -13,7 +13,7 @@ public class RandomizerLogic
         ArrayList<BasicMonster> monsters = new ArrayList<>();
         Random rand = new Random();
         
-        int mobsCount = arena.getWaveCount() * (rand.nextInt(3) + 1);
+        int mobsCount = arena.getWaveCount() + (rand.nextInt(3) + 1);
                 
         for(int i = 0; i < mobsCount; i++)
         {

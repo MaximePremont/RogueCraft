@@ -8,7 +8,6 @@ import fr.blueslime.roguecraft.utils.RGB;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Random;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -26,26 +25,32 @@ public class RandomizerMonster
         monster.setArmorChestplate(armor[1]);
         monster.setArmorLeggings(armor[2]);
         monster.setArmorBoots(armor[3]);
-        monster.setWeapon(this.randomWeapon(arena.getWaveCount()));
+        monster.setWeapon(this.randomWeapon(monster.getTypeOfMob(), arena.getWaveCount()));
         
         return monster;
     }
     
     private EntityType takeRandomEntityType(Arena arena)
     {
-        Random rand = new Random();
         ArrayList<EntityType> types = MonsterTypes.getMonsterAtWave(arena.getWaveCount());
-        
         Collections.shuffle(types, new Random(System.nanoTime()));
-        
-        int index = rand.nextInt(types.size());
-        return types.get(index);
+        return types.get(0);
     }
     
-    public ItemStack randomWeapon(int waveCount)
+    public ItemStack randomWeapon(EntityType type, int waveCount)
     {
-        ItemStack weapon = new ItemStack(Material.AIR, 1);   
-        return this.applyEnchantments(weapon, this.randomEnchantmentForWeapon(waveCount));
+        ItemStack weapon;
+        
+        if(type == EntityType.SKELETON)
+        {
+            weapon = new ItemStack(Material.BOW, 1);
+        }
+        else
+        {
+            weapon = new ItemStack(Material.IRON_SWORD, 1);
+        }
+        
+        return this.applyEnchantments(weapon, this.randomEnchantmentForWeapon(weapon.getType(), waveCount));
     }
     
     public HashMap<Enchantment, Integer> randomEnchantmentForArmor(int waveCount)
@@ -62,28 +67,35 @@ public class RandomizerMonster
         else if(waveCount >= 20) { enchantList.put(Enchantment.THORNS, 2); }
         else if(waveCount >= 30) { enchantList.put(Enchantment.THORNS, 3); }
         
-        enchantList.put(Enchantment.DURABILITY, Integer.MAX_VALUE);
+        enchantList.put(Enchantment.DURABILITY, 10);
         
         return enchantList;
     }
     
-    public HashMap<Enchantment, Integer> randomEnchantmentForWeapon(int waveCount)
+    public HashMap<Enchantment, Integer> randomEnchantmentForWeapon(Material material, int waveCount)
     {
         HashMap<Enchantment, Integer> enchantList = new HashMap<>();
         
-        if(waveCount >= 30) { enchantList.put(Enchantment.DAMAGE_ALL, 5); }
-        else if(waveCount >= 20) { enchantList.put(Enchantment.DAMAGE_ALL, 4); }
-        else if(waveCount >= 15) { enchantList.put(Enchantment.DAMAGE_ALL, 3); }
-        else if(waveCount >= 10) { enchantList.put(Enchantment.DAMAGE_ALL, 2); }
-        else if(waveCount >= 5) { enchantList.put(Enchantment.DAMAGE_ALL, 1); }
+        if(material == Material.IRON_SWORD)
+        {
+            if(waveCount >= 30) { enchantList.put(Enchantment.DAMAGE_ALL, 5); }
+            else if(waveCount >= 20) { enchantList.put(Enchantment.DAMAGE_ALL, 4); }
+            else if(waveCount >= 15) { enchantList.put(Enchantment.DAMAGE_ALL, 3); }
+            else if(waveCount >= 10) { enchantList.put(Enchantment.DAMAGE_ALL, 2); }
+
+            if(waveCount >= 10) { enchantList.put(Enchantment.FIRE_ASPECT, 1); }
+        }
+        else if(material == Material.BOW)
+        {
+            if(waveCount >= 30) { enchantList.put(Enchantment.ARROW_DAMAGE, 5); }
+            else if(waveCount >= 20) { enchantList.put(Enchantment.ARROW_DAMAGE, 4); }
+            else if(waveCount >= 15) { enchantList.put(Enchantment.ARROW_DAMAGE, 3); }
+            else if(waveCount >= 10) { enchantList.put(Enchantment.ARROW_DAMAGE, 2); }
+
+            if(waveCount >= 10) { enchantList.put(Enchantment.ARROW_FIRE, 1); }
+        }
         
-        if(waveCount >= 10) { enchantList.put(Enchantment.FIRE_ASPECT, 1); }
-        
-        if(waveCount >= 10) { enchantList.put(Enchantment.KNOCKBACK, 1); }
-        else if(waveCount >= 20) { enchantList.put(Enchantment.KNOCKBACK, 2); }
-        else if(waveCount >= 30) { enchantList.put(Enchantment.KNOCKBACK, 3); }
-        
-        enchantList.put(Enchantment.DURABILITY, Integer.MAX_VALUE);
+        enchantList.put(Enchantment.DURABILITY, 10);
         
         return enchantList;
     }
@@ -117,12 +129,10 @@ public class RandomizerMonster
     {
         if(stack != null)
         {
-            Iterator<Enchantment> keySet = enchantments.keySet().iterator();
-
-            while(keySet.hasNext())
+            for(Enchantment enchantment : enchantments.keySet())
             {
-                Enchantment enchantment = keySet.next();
-                stack.addUnsafeEnchantment(enchantment, enchantments.get(enchantment));
+                int lvl = enchantments.get(enchantment);
+                stack.addUnsafeEnchantment(enchantment, lvl);
             }
         }
         

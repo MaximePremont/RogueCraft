@@ -1,6 +1,5 @@
 package fr.blueslime.roguecraft.arena;
 
-import de.inventivegames.util.title.TitleManager;
 import fr.blueslime.roguecraft.Messages;
 import fr.blueslime.roguecraft.RogueCraft;
 import fr.blueslime.roguecraft.arena.Wave.WaveType;
@@ -11,30 +10,27 @@ import fr.blueslime.roguecraft.randomizer.RandomizerLogic;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.UUID;
-import net.samagames.network.Network;
-import net.samagames.network.client.GameArena;
-import net.samagames.network.client.GamePlayer;
-import net.samagames.network.json.Status;
+import net.samagames.gameapi.GameAPI;
+import net.samagames.gameapi.json.Status;
+import net.samagames.gameapi.network.NetworkManager;
+import net.samagames.gameapi.types.GameArena;
 import net.zyuiop.statsapi.StatsApi;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-public class Arena extends GameArena
+public class Arena implements GameArena
 {
     public static enum Role { PLAYER, SPECTATOR }
     
+    private final UUID arenaID;
     private final WaveSystem waveSystem;
     private final RandomizerLogic randomizerLogic;
     private final RandomizerMonster randomizerMonster;
@@ -42,50 +38,40 @@ public class Arena extends GameArena
     private final RandomizerChestLoots randomizerChestLoots;
     private final World world;
     private final ArrayList<ArenaPlayer> arenaPlayers;
-    private final HashMap<WaveType, Area> areas;
-    private String theme;
+    private final HashMap<Area, WaveType> areas;
+    private final NetworkManager networkManager;
+    private final int maxPlayers, minPlayers;
+    private String mapName;
     private BeginTimer timer;
     private Area actualArea;
     private Wave wave;
     private int waveCount;
-    private int minPlayers;
-    
-    private File dataSource;
-    
-    public Arena(World world, int maxPlayers, int maxVIP, String mapName, UUID arenaID)
-    {        
-        super(maxPlayers, maxVIP, mapName, arenaID, false);
+    private Status status;
         
+    public Arena(UUID arenaID, World world) 
+    {
+        this.arenaID = arenaID;
         this.arenaPlayers = new ArrayList<>();        
         this.waveSystem = new WaveSystem(this);
         this.randomizerLogic = new RandomizerLogic();
         this.randomizerMonster = new RandomizerMonster();
         this.randomizerBoss = new RandomizerBoss();
         this.randomizerChestLoots = new RandomizerChestLoots();
+        this.networkManager = GameAPI.getManager();
         this.areas = new HashMap<>();
         this.timer = null;
         this.waveCount = 1;
-        this.maxPlayers = maxPlayers;
-        this.mapName = mapName;
-        this.arenaID = arenaID;
+        this.maxPlayers = 5;
+        this.minPlayers = 3;
         
         this.world = world;
         this.world.setGameRuleValue("mobGriefing", "false");
-        
-        this.setStatus(Status.Available);
     }
     
-    @Override
-    public String finishJoinPlayer(UUID playerID)
+    public String joinPlayer(UUID playerID)
     {
-        String ret = super.finishJoinPlayer(playerID);
-        Bukkit.getLogger().info(ret);
-        
-        if (!ret.equals("OK"))
-            return ret;
-        
         Player player = Bukkit.getPlayer(playerID);
-        ArenaPlayer aPlayer = new ArenaPlayer(new GamePlayer(player));
+        ArenaPlayer aPlayer = new ArenaPlayer(this, player);
         
         if(aPlayer.hasClass())
         {
@@ -93,20 +79,17 @@ public class Arena extends GameArena
             player.teleport(new Location(this.world, 0, 70, 0));
             this.arenaPlayers.add(aPlayer);
 
-            this.broadcastMessage(Messages.playerJoinedArena.replace("${PSEUDO}", player.getName()).replace("${JOUEURS}", "" + players.size()).replace("${JOUEURS_MAX}", "" + this.maxPlayers));
+            this.broadcastMessage(Messages.playerJoinedArena.replace("${PSEUDO}", player.getName()).replace("${JOUEURS}", "" + this.arenaPlayers.size()).replace("${JOUEURS_MAX}", "" + this.maxPlayers));
 
             refreshPlayers(true);
             setupPlayer(player);
 
-            for(GameArena arena : RogueCraft.getPlugin().getArenasManager().getArenas().values())
-            {
-                for(ArenaPlayer pPlayer : ((Arena)arena).getArenaPlayers())
-                {                    
-                    if(pPlayer.getPlayer().getPlayer() != null)
-                    {
-                        pPlayer.getPlayer().getPlayer().getPlayer().getPlayer().hidePlayer(player);
-                        player.hidePlayer(pPlayer.getPlayer().getPlayer().getPlayer().getPlayer());
-                    }
+            for(ArenaPlayer pPlayer : this.arenaPlayers)
+            {                    
+                if(pPlayer.getPlayer().getPlayer() != null)
+                {
+                    pPlayer.getPlayer().getPlayer().getPlayer().getPlayer().hidePlayer(player);
+                    player.hidePlayer(pPlayer.getPlayer().getPlayer().getPlayer().getPlayer());
                 }
             }
 
@@ -130,29 +113,13 @@ public class Arena extends GameArena
             }
 
             player.getInventory().setItem(8, RogueCraft.getPlugin().getLeaveItem());
-
-            ItemStack rules = new ItemStack(Material.WRITTEN_BOOK, 1);
-            BookMeta rulesMeta = (BookMeta) rules.getItemMeta();
-
-            rulesMeta.setAuthor("SamaGames - BlueSlime");
-            rulesMeta.setTitle("Règles du jeu");
-
-            ArrayList<String> pages = new ArrayList<>();
-            pages.add(ChatColor.GOLD + "Bienvenue sur " + ChatColor.DARK_GREEN + "RogueCraft ! \n\n > Sommaire : " + ChatColor.BLACK + "\n\n P.2: Principe du jeu \n P.3: Armes \n\n" + ChatColor.RED + "Pour une meilleure expérience de jeu, désactiver les nuages.\n\n" + ChatColor.BLACK + "Jeu : BlueSlime\nMaps : Amalgar");
-            pages.add(ChatColor.DARK_GREEN + "Principe du jeu :" + ChatColor.BLACK + "\n\nSwag");
-            pages.add(ChatColor.DARK_GREEN + "Armes :" + ChatColor.BLACK + "\n\nSwag");
-
-            rulesMeta.setPages(pages);
-            rules.setItemMeta(rulesMeta);
-
-            player.getInventory().setItem(0, rules);
-            player.sendMessage(ChatColor.GOLD + "\nBienvenue sur " + ChatColor.AQUA + "RogueCraft" + ChatColor.GOLD + " !");
-
-            Network.getManager().refreshArena(this);
+            player.sendMessage(ChatColor.GOLD + "\nBienvenue sur " + ChatColor.RED + "RogueCraft" + ChatColor.GOLD + " !");
+            
+            this.networkManager.refreshArena(this);
         }
         else
         {
-            RogueCraft.getPlugin().kickPlayer(player, "Vous devez avoir créé une classe pour pouvoir jouer à ce jeu.");
+            return "Vous devez avoir créé une classe pour pouvoir jouer à ce jeu.";
         }
         
         return "OK";
@@ -162,7 +129,8 @@ public class Arena extends GameArena
     {
         for(ArenaPlayer player : this.arenaPlayers)
         {
-            player.getPlayer().getPlayer().sendMessage(message);
+            if(Bukkit.getPlayer(player.getPlayerID()) != null)
+                player.getPlayer().getPlayer().sendMessage(message);
         }
     }
     
@@ -186,11 +154,11 @@ public class Arena extends GameArena
     {        
         if(isGameStarted())
         {
-            Network.getManager().refreshArena(this);
+            this.networkManager.refreshArena(this);
             return;
         }
         
-        if(timer != null && players.size() < this.getMinPlayers())
+        if(timer != null && this.arenaPlayers.size() < this.minPlayers)
         {
             broadcastMessage(Messages.notEnougthPlayers);
             timer.setTimeout(0);
@@ -199,20 +167,19 @@ public class Arena extends GameArena
             
             status = Status.Available;
             
-            Network.getManager().refreshArena(this);
-            
+            this.networkManager.refreshArena(this);
             return;
         }
         
-        if (timer == null && players.size() >= minPlayers) 
+        if (timer == null && this.arenaPlayers.size() >= this.minPlayers) 
         {
             timer = new BeginTimer(this);
             timer.start();
             
             status = Status.Starting;
+            
+            this.networkManager.refreshArena(this);
         }
-        
-        Network.getManager().refreshArena(this);
     }
     
     public void setupPlayer(Player player)
@@ -252,29 +219,30 @@ public class Arena extends GameArena
             player.giveStuff();
             
             StatsApi.increaseStat(p, "roguecraft", "played_games", 1);
-            
-            TitleManager.sendTitle(p, "{\"text\":\"\",\"extra\":[{\"text\":\"RogueCraft\",\"color\":\"aqua\"}]}");
-            TitleManager.sendSubTitle(p, "{\"text\":\"\",\"extra\":[{\"text\":\"Jeu créé par BlueSlime\",\"color\":\"aqua\"}]}");
+        }
+        
+        for (ArenaPlayer pPlayer : remove)
+        {
+            this.arenaPlayers.remove(pPlayer);
         }
         
         if(this.timer != null)
             this.timer.end();
         
         this.timer = null;
-        
-        Network.getManager().refreshArena(this);
-        
+        this.networkManager.refreshArena(this);
+                
         broadcastMessage(ChatColor.GOLD + "" + ChatColor.BOLD + "[CONSEIL] Ce jeu doit se jouer en coopération avec les autres joueurs.");
         broadcastMessage(ChatColor.GOLD + "" + ChatColor.BOLD + "[CONSEIL] Nous pouvons que vous conseillez de vous réunir en vocal, sur le mumble de SamaGames par exemple ;)");
         
+        this.waveCount = 0;
         this.waveSystem.next();
     }
     
     public void endGame()
     {
         this.status = Status.Stopping;
-        
-        Network.getManager().refreshArena(this);
+        this.networkManager.refreshArena(this);
         
         for(ArenaPlayer player : this.arenaPlayers)
         {
@@ -282,8 +250,6 @@ public class Arena extends GameArena
         }
         
         this.arenaPlayers.clear();
-        
-        Network.getManager().refreshArena(this);
     }
     
     public void finish()
@@ -323,12 +289,12 @@ public class Arena extends GameArena
             broadcastMessage(Messages.lastEliminatedPlayer.replace("${PSEUDO}", player.getName()));
     }
     
-    public void lose(Player player, Location respawnLocation)
+    public void lose(Player player)
     {
         player.getInventory().setItem(8, RogueCraft.getPlugin().getLeaveItem());
         loseHider(player);
         player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 1));
-        player.teleport(respawnLocation);
+        player.teleport(this.getWave().getWaveArea().getPlayersSpawn());
         player.setAllowFlight(true);
         player.setFlying(true);
     }
@@ -352,11 +318,9 @@ public class Arena extends GameArena
         }
     }
     
-    public void stumpPlayer(GamePlayer vPlayer)
-    {
-        ArenaPlayer player = this.getPlayer(vPlayer);
-        
-        this.arenaPlayers.remove(player);
+    public void stumpPlayer(ArenaPlayer aPlayer)
+    {        
+        this.arenaPlayers.remove(aPlayer);
         
         if (!this.isGameStarted())
         {
@@ -365,14 +329,20 @@ public class Arena extends GameArena
         }
         
         if (this.getActualPlayers() == 0)
+        {
             finish();
-        else if (this.getActualPlayers() < 0)
+        }
+        else if (this.getArenaPlayers().isEmpty())
         {
             endGame();
             setupGame();
         }
+        else
+        {
+            loseMessage(aPlayer.getPlayer());
+        }
         
-        Network.getManager().refreshArena(this);
+        this.networkManager.refreshArena(this);
     }
     
     public void addCoin(Player player, int count)
@@ -389,34 +359,19 @@ public class Arena extends GameArena
     public void setupGame()
     {
         this.status = Status.Available;
-        Network.getManager().refreshArena(this);
+        this.networkManager.refreshArena(this);
     }
     
     public void registerArea(WaveType type, Area area)
     {
-        this.areas.put(type, area);
+        this.areas.put(area, type);
     }
     
     public void setMapName(String mapName)
     {
         this.mapName = mapName;
     }
-    
-    public void setMinPlayers(int minPlayers)
-    {
-        this.minPlayers = minPlayers;
-    }
-    
-    public void setTheme(String theme)
-    {
-        this.theme = theme;
-    }
 
-    public void setDataSource(File dataSource)
-    {
-        this.dataSource = dataSource;
-    }
-    
     public void setWave(Wave wave)
     {
         this.wave = wave;
@@ -434,31 +389,30 @@ public class Arena extends GameArena
             if(aPlayer.getPlayer().getPlayer().getUniqueId().equals(player.getUniqueId()))
             {
                 aPlayer.setRole(role);
-                GamePlayer gamePlayer = new GamePlayer(player.getUniqueId());
-                if(role == Role.SPECTATOR)
-                {
-                    this.players.remove(gamePlayer);
-                    if (!this.spectators.contains(gamePlayer))
-                        this.spectators.add(gamePlayer);
-                }
-                else
-                {
-                    this.spectators.remove(gamePlayer);
-                    if (!this.players.contains(gamePlayer))
-                        this.players.add(gamePlayer);
-                }
             }
         }
+    }
+    
+    @Override
+    public void setStatus(Status status)
+    {
+        this.status = status;
     }
     
     public void upWaveCount()
     {
         this.waveCount += 1;
     }
-
-    public String getTheme()
+    
+    @Override
+    public int countGamePlayers()
     {
-        return this.theme;
+        return this.getActualPlayers();
+    }
+
+    public String getMapName()
+    {
+        return this.mapName;
     }
 
     public Wave getWave()
@@ -469,11 +423,6 @@ public class Arena extends GameArena
     public int getWaveCount()
     {
         return this.waveCount;
-    }
-
-    public File getDataSource()
-    {
-        return this.dataSource;
     }
     
     public World getWorld()
@@ -487,28 +436,23 @@ public class Arena extends GameArena
         else return timer.getTime();
     }
     
-    public int getMinPlayers()
-    {
-        return this.minPlayers;
-    }
-    
     public Area getActualArea()
     {
         return this.actualArea;
     }
 
-    public ArenaPlayer getPlayer(GamePlayer vPlayer)
+    public ArenaPlayer getPlayer(Player player)
     {
-        for(ArenaPlayer player : this.arenaPlayers)
+        for(ArenaPlayer aPlayer : this.arenaPlayers)
         {            
-            if(player.getPlayer().equals(vPlayer))
-                return player;
+            if(aPlayer.getPlayerID().equals(player.getUniqueId()))
+                return aPlayer;
         }
         
         return null;
     }
     
-    public HashMap<WaveType, Area> getAreas()
+    public HashMap<Area, WaveType> getAreas()
     {
         return this.areas;
     }
@@ -516,13 +460,11 @@ public class Arena extends GameArena
     public ArrayList<Area> getAreasByType(WaveType type)
     {
         ArrayList<Area> temp = new ArrayList<>();
-        Iterator<WaveType> keySet = this.areas.keySet().iterator();
         
-        while(keySet.hasNext())
+        for(Area area : this.areas.keySet())
         {
-            WaveType wType = keySet.next();
-            
-            if(wType == type) temp.add(this.areas.get(wType));
+            if(this.areas.get(area) == type)
+                temp.add(area);
         }
         
         return temp;
@@ -531,6 +473,11 @@ public class Arena extends GameArena
     public WaveSystem getWaveSystem()
     {
         return this.waveSystem;
+    }
+    
+    public NetworkManager getNetworkManager()
+    {
+        return this.networkManager;
     }
     
     public RandomizerLogic getLogicRandomizer()
@@ -584,29 +531,66 @@ public class Arena extends GameArena
         return this.arenaPlayers;
     }
     
-    @Override
-    public int countPlayersIngame()
+    public int getMinPlayers()
     {
-        return this.arenaPlayers.size();
+        return this.minPlayers;
+    }
+    
+    @Override
+    public int getMaxPlayers()
+    {
+        return this.maxPlayers;
+    }
+
+    @Override
+    public int getTotalMaxPlayers()
+    {
+        return this.maxPlayers;
+    }
+
+    @Override
+    public Status getStatus()
+    {
+        return this.status;
+    }
+    
+    @Override
+    public int getVIPSlots()
+    {
+        return 0;
+    }
+
+    @Override
+    public UUID getUUID()
+    {
+        return this.arenaID;
+    }
+
+    @Override
+    public boolean hasPlayer(UUID uuid)
+    {
+        for(ArenaPlayer player : this.arenaPlayers)
+        {
+            if(player.getPlayerID().equals(uuid))
+                return true;
+        }
+        
+        return false;
     }
     
     public boolean canJoin()
     {
-        return ((status.equals(Status.Available) || status.equals(Status.Starting)) && players.size() < maxPlayers);
+        return ((status.equals(Status.Available) || status.equals(Status.Starting)) && this.arenaPlayers.size() < maxPlayers);
     }
     
     public boolean isGameStarted()
     {
         return (status == Status.InGame);
     }
-    
-    public boolean isPlaying(GamePlayer player)
+
+    @Override
+    public boolean isFamous()
     {
-        return this.getPlayer(player) != null;
-    }
-    
-    public boolean isPlaying(UUID player)
-    {
-        return isPlaying(new GamePlayer(player));
+        return false;
     }
 }

@@ -1,5 +1,6 @@
 package fr.blueslime.roguecraft.monsters;
 
+import fr.blueslime.roguecraft.CustomEntityWither;
 import fr.blueslime.roguecraft.RogueCraft;
 import fr.blueslime.roguecraft.arena.Arena;
 import fr.blueslime.roguecraft.utils.ColorUtils;
@@ -9,32 +10,51 @@ import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
+import org.bukkit.craftbukkit.v1_7_R4.CraftWorld;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 
 public class BasicBoss extends BasicMonster
 {
     private String displayName;
-    private double baseHealth;
     private int exploadingID;
     
     public BasicBoss(EntityType typeOfMob)
     {
         super(typeOfMob);
+        this.displayName = "";
     }
     
-    @Override
     public LivingEntity spawnMob(Arena arena, Location location, int waveCount)
     {
-        LivingEntity lEntity = super.spawnMob(arena, location, waveCount);
-        lEntity.setCustomName(ChatColor.GOLD + this.displayName);
-        lEntity.setMaxHealth(this.baseHealth);
-        lEntity.setHealth(this.baseHealth);
-        lEntity.setMetadata("RC-BOSS", new FixedMetadataValue(RogueCraft.getPlugin(), true));
+        LivingEntity lEntity;
+        if(this.typeOfMob != EntityType.WITHER)
+        {
+            lEntity = Bukkit.getWorld("world").spawnCreature(location, this.typeOfMob);
+        }
+        else
+        {
+            CustomEntityWither playerWither = new CustomEntityWither(((CraftWorld) location.getWorld()).getHandle());
+            playerWither.getBukkitEntity().teleport(location);
+            
+            ((CraftWorld) location.getWorld()).getHandle().addEntity(playerWither, CreatureSpawnEvent.SpawnReason.CUSTOM);
+            
+            lEntity = (LivingEntity) playerWither.getBukkitEntity();
+        }
         
+        lEntity.setMaxHealth(this.getCalculatedHealth(waveCount) + 1);
+        lEntity.setHealth(this.getCalculatedHealth(waveCount));
+        lEntity.setMetadata("RC-MOBUUID", new FixedMetadataValue(RogueCraft.getPlugin(), this.uuid.toString()));
+        lEntity.setMetadata("RC-ARENA", new FixedMetadataValue(RogueCraft.getPlugin(), arena.getUUID().toString()));
+        lEntity.setMetadata("RC-BOSS", new FixedMetadataValue(RogueCraft.getPlugin(), true));
+
+        if(!this.displayName.equals(""))
+            lEntity.setCustomName(ChatColor.GOLD + this.displayName);
+
         return lEntity;
     }
     
@@ -86,13 +106,18 @@ public class BasicBoss extends BasicMonster
         Bukkit.getScheduler().cancelTask(this.exploadingID);
     }
     
+    public double getCalculatedHealth(int waveCount)
+    {
+        return 300.0D + (0.5 * waveCount);
+    }
+    
+    public double getCalculatedDamage(int waveCount)
+    {
+        return 5.0D + (1.6 / waveCount);
+    }
+    
     public void setCustomName(String displayName)
     {
         this.displayName = displayName;
-    }
-    
-    public void setBaseHealth(double baseHealth)
-    {
-        this.baseHealth = baseHealth;
     }
 }

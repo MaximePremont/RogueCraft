@@ -7,51 +7,71 @@ import fr.blueslime.roguecraft.arena.Arena.Role;
 import fr.blueslime.roguecraft.stuff.PlayerStuff;
 import fr.blueslime.roguecraft.stuff.PlayerStuffDeserializer;
 import fr.blueslime.roguecraft.stuff.StuffManager.PlayerClass;
-import net.samagames.network.client.GamePlayer;
+import java.util.UUID;
 import net.zyuiop.MasterBundle.FastJedis;
 import net.zyuiop.coinsManager.CoinsManager;
+import net.zyuiop.statsapi.StatsApi;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.Potion;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Scoreboard;
 import redis.clients.jedis.ShardedJedis;
 
 public class ArenaPlayer
 {
-    private final GamePlayer player;
+    private final Arena arena;
+    private final Player player;
+    private final UUID playerId;
     private Role role;
-    private Location deathLocation;
+    private final Scoreboard board;
+    private final Objective bar;
     
     private final PlayerStuff pStuff;
-    private final ItemStack[] armor;
-    private final ItemStack weapon;
+    private ItemStack[] armor;
+    private ItemStack weapon;
     private PlayerClass pClass;
     
-    public ArenaPlayer(GamePlayer player)
+    private int coins;
+    private int xp;
+    
+    public ArenaPlayer(Arena arena, Player player)
     {
+        this.arena = arena;
         this.player = player;
+        this.playerId = player.getUniqueId();
         this.role = Role.PLAYER;
         
-        String temp = "{\"helmet\":[1,1,1,1],\"chestplate\":[1,1,1,1],\"leggings\":[1,1,1,1],\"boots\":[1,1,1,1],\"bow\":[1,1,1,1],\"heal-potion\":[1, 1],\"strenth-potion\":[1, 1],\"bedrock-potion\":true,\"steak\":5}";
+        ShardedJedis redis = FastJedis.jedis();
         
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(PlayerStuff.class, new PlayerStuffDeserializer());
         
         Gson gson = gsonBuilder.create();
-        this.pStuff = gson.fromJson(temp, PlayerStuff.class);
+        this.pStuff = gson.fromJson(redis.get("roguecraft:properties:" + player.getUniqueId()), PlayerStuff.class);
         
-        this.armor = RogueCraft.getPlugin().getStuffManager().createArmor(this);
-        this.weapon = RogueCraft.getPlugin().getStuffManager().createWeapon(this);
+        redis.disconnect();
+        
+        this.board = Bukkit.getScoreboardManager().getNewScoreboard();
+        
+        this.bar = this.board.registerNewObjective("Infos", "dummy");
+        this.bar.setDisplaySlot(DisplaySlot.SIDEBAR);
+        this.bar.setDisplayName("" + ChatColor.DARK_AQUA + ChatColor.BOLD + "RogueCraft");
+        
+        this.player.getPlayer().setScoreboard(this.board);
     }
     
     public void giveStuff()
-    {
+    {        
+        this.armor = RogueCraft.getPlugin().getStuffManager().createArmor(this);
+        this.weapon = RogueCraft.getPlugin().getStuffManager().createWeapon(this);
+        
         Player p = this.player.getPlayer();
         int[] inventoryCaseHeal = new int[] { 1, 28, 19 };
         int[] inventoryCaseStrenth = new int[] { 2, 29, 20 };
@@ -68,7 +88,12 @@ public class ArenaPlayer
         
         p.getInventory().setItem(0, this.weapon);
         
-        if(this.pStuff.getHealPotion().length != 0)
+        if(this.weapon.getType() == Material.BOW)
+        {
+            p.getInventory().setItem(27, new ItemStack(Material.ARROW, 1));
+        }
+        
+        if(this.pStuff.getHealPotion()[0] != 0)
         {
             Potion healPotion = new Potion(PotionType.INSTANT_HEAL);
             healPotion.setLevel(this.pStuff.getHealPotion()[1]);
@@ -79,7 +104,7 @@ public class ArenaPlayer
             }
         }
         
-        if(this.pStuff.getStrenthPotion().length != 0)
+        if(this.pStuff.getStrenthPotion()[0] != 0)
         {
             Potion strenthPotion = new Potion(PotionType.STRENGTH);
             strenthPotion.setLevel(this.pStuff.getStrenthPotion()[1]);
@@ -92,26 +117,50 @@ public class ArenaPlayer
         
         if(this.pStuff.hasBedrockPotion())
         {
-            ItemStack potion = new ItemStack(Material.POTION, 1);
-            
-            PotionMeta meta = (PotionMeta) potion.getItemMeta();
-            meta.setDisplayName(ChatColor.RED + "" + ChatColor.BOLD + "Bedrock Potion");
-            meta.addCustomEffect(new PotionEffect(PotionEffectType.HEAL, 5, 20), true);
-            meta.addCustomEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 5, 20), true);
-            meta.addCustomEffect(new PotionEffect(PotionEffectType.SPEED, 10, 2), true);
-            meta.addCustomEffect(new PotionEffect(PotionEffectType.HUNGER, 20, 2), true);
-            
-            potion.setItemMeta(meta);
-            
-            p.getInventory().setItem(7, potion);
+            p.getInventory().setItem(7, RogueCraft.getPlugin().getStuffManager().getBedrockPotion());
         }
         
         p.getInventory().setItem(8, new ItemStack(Material.COOKED_BEEF, this.pStuff.getSteak()));
     }
-
-    public void addCoins(int c)
+    
+    public void repearStuff()
     {
-        CoinsManager.creditJoueur(this.player.getPlayer(), c, true);
+        Player p = this.player.getPlayer();
+        
+        p.getInventory().setHelmet(this.armor[0]);
+        p.getInventory().setChestplate(this.armor[1]);
+        p.getInventory().setLeggings(this.armor[2]);
+        p.getInventory().setBoots(this.armor[3]);
+        p.getInventory().setItem(0, this.weapon);
+    }
+
+    public void addCoins(final int c)
+    {
+        Bukkit.getScheduler().runTaskAsynchronously(RogueCraft.getPlugin(), new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                coins += CoinsManager.syncCreditJoueur(player.getUniqueId(), c, true, true);
+            }
+        });
+        
+        updateScoreboard();
+    }
+    
+    public void addXP(int xp)
+    {
+        StatsApi.increaseStat(this.player.getUniqueId(), "roguecraft", "xp", xp);
+        this.xp += xp;
+        updateScoreboard();
+    }
+    
+    public void updateScoreboard()
+    {
+        this.bar.getScore(Bukkit.getOfflinePlayer(ChatColor.GOLD + "Vague:")).setScore(this.arena.getWaveCount());
+        this.bar.getScore(Bukkit.getOfflinePlayer(ChatColor.GOLD + "Mobs:")).setScore(this.arena.getWave().getMonstersLeft());
+        this.bar.getScore(Bukkit.getOfflinePlayer(ChatColor.GOLD + "Coins:")).setScore(this.coins);
+        this.bar.getScore(Bukkit.getOfflinePlayer(ChatColor.GOLD + "XP:")).setScore(this.xp);
     }
 
     public void setRole(Role role)
@@ -123,15 +172,15 @@ public class ArenaPlayer
     {
         this.pClass = pClass;
     }
-    
-    public void setDeathLocation(Location deathLocation)
-    {
-        this.deathLocation = deathLocation;
-    }
         
-    public GamePlayer getPlayer()
+    public Player getPlayer()
     {
         return this.player;
+    }
+    
+    public UUID getPlayerID()
+    {
+        return this.playerId;
     }
     
     public Role getRole()
@@ -143,12 +192,7 @@ public class ArenaPlayer
     {
         return this.pClass;
     }
-    
-    public Location getDeathLocation()
-    {
-        return this.deathLocation;
-    }
-    
+
     public PlayerStuff getPlayerStuff()
     {
         return this.pStuff;
@@ -168,9 +212,9 @@ public class ArenaPlayer
     {
         ShardedJedis redis = FastJedis.jedis();
             
-        if(redis.exists("roguecraft:properties:" + this.player.getPlayerID()))
+        if(redis.exists("roguecraft:properties:" + this.player.getUniqueId()))
         {
-            return !redis.get("roguecraft:properties:" + this.player.getPlayerID()).equals("");
+            return !redis.get("roguecraft:properties:" + this.player.getUniqueId()).equals("");
         }
         else
         {

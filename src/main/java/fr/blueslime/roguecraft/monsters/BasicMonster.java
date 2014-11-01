@@ -5,6 +5,7 @@ import fr.blueslime.roguecraft.arena.Arena;
 import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.entity.Creature;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.EntityEquipment;
@@ -13,8 +14,8 @@ import org.bukkit.metadata.FixedMetadataValue;
 
 public class BasicMonster implements Cloneable
 {
-    private final UUID uuid;
-    private final EntityType typeOfMob;
+    protected final UUID uuid;
+    protected final EntityType typeOfMob;
     private final double baseHealth;
     private ItemStack armorHelmet, armorChestplate, armorLeggings, armorBoots;
     private ItemStack weapon;
@@ -30,10 +31,16 @@ public class BasicMonster implements Cloneable
     {
         LivingEntity lEntity = Bukkit.getWorld("world").spawnCreature(location, this.typeOfMob);
 
-        lEntity.setMaxHealth(this.getCalculatedHealth(waveCount));
-        lEntity.setHealth(this.getCalculatedHealth(waveCount));
+        double health = this.getCalculatedHealth(waveCount);
+        lEntity.setMaxHealth(health + 1);
+        lEntity.setHealth(health);
         lEntity.setMetadata("RC-MOBUUID", new FixedMetadataValue(RogueCraft.getPlugin(), this.uuid.toString()));
-        lEntity.setMetadata("RC-ARENA", new FixedMetadataValue(RogueCraft.getPlugin(), arena.getArenaID().toString()));
+        lEntity.setMetadata("RC-ARENA", new FixedMetadataValue(RogueCraft.getPlugin(), arena.getUUID().toString()));
+
+        if(this.typeOfMob == EntityType.SPIDER || this.typeOfMob == EntityType.PIG_ZOMBIE)
+        {
+            ((Creature) lEntity).setTarget(arena.getActualPlayersList().get(0).getPlayer().getPlayer());
+        }
 
         EntityEquipment ee = lEntity.getEquipment();
 
@@ -41,7 +48,7 @@ public class BasicMonster implements Cloneable
         ee.setChestplate(this.getArmorChestplate());
         ee.setLeggings(this.getArmorLeggings());
         ee.setBoots(this.getArmorBoots());
-  
+
         ee.setItemInHand(this.getAtttackWeapon());
 
         return lEntity;
@@ -114,14 +121,14 @@ public class BasicMonster implements Cloneable
         return this.baseHealth;
     }
     
-    public double getCalculatedHealth(int monsterLevel)
+    public double getCalculatedHealth(int waveCount)
     {
-        return this.baseHealth * (1.2 * monsterLevel);
+        return this.baseHealth + (0.3 * waveCount);
     }
 
     public double getCalculatedDamage(double baseDamage, int waveCount)
     {
-        return baseDamage + (0.4 * waveCount);
+        return baseDamage + (1.5 / waveCount);
     }
     
     @Override

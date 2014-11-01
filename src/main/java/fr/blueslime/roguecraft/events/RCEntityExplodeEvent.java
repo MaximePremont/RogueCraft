@@ -1,5 +1,6 @@
 package fr.blueslime.roguecraft.events;
 
+import fr.blueslime.roguecraft.RogueCraft;
 import java.util.List;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
@@ -13,5 +14,10 @@ public class RCEntityExplodeEvent implements Listener
     {        
         List<Block> blocks = event.blockList();
         event.blockList().removeAll(blocks);
+        
+        if(event.getEntity().hasMetadata("RC-ARENA"))
+        {
+            RogueCraft.getPlugin().getArena().getWave().monsterKilled();
+        }
     }
 }

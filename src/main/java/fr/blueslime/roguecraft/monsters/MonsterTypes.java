@@ -30,7 +30,7 @@ public enum MonsterTypes
         
         for(MonsterTypes type : MonsterTypes.values())
         {
-            if(type.getMinWave() <= wave)
+            if(type.getMinWave() <= (wave))
                 temp.add(type.getType());
         }
         

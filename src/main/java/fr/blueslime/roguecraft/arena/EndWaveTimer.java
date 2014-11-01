@@ -2,6 +2,7 @@ package fr.blueslime.roguecraft.arena;
 
 import fr.blueslime.roguecraft.RogueCraft;
 import static java.lang.Thread.sleep;
+import net.samagames.network.client.GamePlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 
@@ -12,10 +13,10 @@ public class EndWaveTimer extends Thread
     private boolean count = false;
     private boolean cont = true;
 
-    public EndWaveTimer(Arena parent)
+    public EndWaveTimer(Arena parent, long time)
     {
         this.parent = parent;
-        time = 5; // 30 secondes
+        this.time = time;
     }
 
     public void end()
@@ -74,15 +75,22 @@ public class EndWaveTimer extends Thread
         
         for(ArenaPlayer aPlayer : parent.getArenaPlayers())
         {
-            aPlayer.getPlayer().getPlayer().setLevel(seconds);
-            
-            if (ring)
+            if(aPlayer != null)
             {
-                aPlayer.getPlayer().getPlayer().playSound(aPlayer.getPlayer().getPlayer().getLocation(), Sound.NOTE_PIANO, 1, 1);
+                aPlayer.getPlayer().getPlayer().setLevel(seconds);
+
+                if (ring)
+                {
+                    aPlayer.getPlayer().getPlayer().playSound(aPlayer.getPlayer().getPlayer().getLocation(), Sound.NOTE_PIANO, 1, 1);
+                }
+                if (seconds == 0)
+                {
+                    aPlayer.getPlayer().getPlayer().playSound(aPlayer.getPlayer().getPlayer().getLocation(), Sound.NOTE_PLING, 1, 1);
+                }
             }
-            if (seconds == 0)
+            else
             {
-                aPlayer.getPlayer().getPlayer().playSound(aPlayer.getPlayer().getPlayer().getLocation(), Sound.NOTE_PLING, 1, 1);
+                parent.stumpPlayer(aPlayer);
             }
         }
     }

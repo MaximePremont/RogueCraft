@@ -34,7 +34,7 @@ public class BeginTimer extends Thread
                 formatTime();
                 setTimeout((int) time);
 
-                if (parent.getPlayers().size() < parent.getMinPlayers())
+                if (parent.getActualPlayers() < parent.getMinPlayers())
                 {
                     // Au cas où l'arène ne détecterai pas le manque de joueurs //
                     setTimeout(0);

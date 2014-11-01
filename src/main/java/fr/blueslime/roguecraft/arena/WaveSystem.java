@@ -10,11 +10,8 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-import net.zyuiop.coinsManager.CoinsManager;
-import net.zyuiop.statsapi.StatsApi;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -37,6 +34,8 @@ public class WaveSystem
     
     public void next()
     {
+        this.arena.upWaveCount();
+        
         if(this.endWaveTimer != null)
         {
             this.endWaveTimer.end();
@@ -45,30 +44,30 @@ public class WaveSystem
         
         for(Player player : Bukkit.getOnlinePlayers())
         {
-            player.teleport(new Location(arena.getWorld(), 0.0D, 250.0D, 0.0D));
+            player.teleport(new Location(this.arena.getWorld(), 0.0D, 250.0D, 0.0D));
         }
         
         Bukkit.getLogger().info("[RogueCraft-WaveSystem] Selecting random area...");
-        arena.broadcastMessage(Messages.preparingArea);
+        this.arena.broadcastMessage(Messages.preparingArea);
         
         WaveType waveType = WaveType.NORMAL;
         
-        if(arena.getWaveCount() % 10 == 0)
+        if(this.arena.getWaveCount() % 10 == 0)
             waveType = WaveType.BOSS;
         
         Bukkit.getLogger().info("[RogueCraft-WaveSystem] Wave type is: " + waveType.name().toUpperCase());
         
-        ArrayList<Area> areas = arena.getAreasByType(waveType);
+        ArrayList<Area> areas = this.arena.getAreasByType(waveType);
         Collections.shuffle(areas, new Random(System.nanoTime()));
         Area area = areas.get(0);
         
-        Wave wave = new Wave(arena, waveType, arena.getWaveCount(), area);
+        Wave wave = new Wave(this.arena, waveType, this.arena.getWaveCount(), area);
         
         Bukkit.getLogger().info("[RogueCraft-WaveSystem] Creating mob list...");
         
         if(waveType == WaveType.NORMAL)
         {
-            ArrayList<BasicMonster> monsters = arena.getLogicRandomizer().prepareMobs(arena);
+            ArrayList<BasicMonster> monsters = this.arena.getLogicRandomizer().prepareMobs(this.arena);
 
             for(BasicMonster monster : monsters)
             {
@@ -77,33 +76,33 @@ public class WaveSystem
         }
         else
         {
-            BasicBoss boss = arena.getLogicRandomizer().prepareBoss(arena);
+            BasicBoss boss = this.arena.getLogicRandomizer().prepareBoss(this.arena);
             wave.registerBoss(boss);
         }
         
         Bukkit.getLogger().info("[RogueCraft-WaveSystem] Mob list created!");
         Bukkit.getLogger().info("[RogueCraft-WaveSystem] Teleporting players...");
         
-        for(Player player : Bukkit.getOnlinePlayers())
+        for(ArenaPlayer player : this.arena.getArenaPlayers())
         {
-            player.teleport(area.getPlayersSpawn().add(0.0D, 1.0D, 1.0D));
+            player.getPlayer().getPlayer().teleport(area.getPlayersSpawn());
         }
         
         Bukkit.getLogger().info("[RogueCraft-WaveSystem] Starting countdown...");
         
-        arena.setActualArea(area);
-        arena.setWave(wave);
-        this.waveTimer = new WaveTimer(arena);
+        this.arena.setActualArea(area);
+        this.arena.setWave(wave);
+        this.waveTimer = new WaveTimer(this.arena);
         this.waveTimer.start();
         
-        arena.broadcastMessage(Messages.waveStarting);
+        this.arena.broadcastMessage(Messages.waveStarting);
         
         Bukkit.getLogger().info("[RogueCraft-WaveSystem] Wave generated, end of work! Time to sleep :D");
     }
     
     public void start()
     {
-        Wave wave = arena.getWave();
+        Wave wave = this.arena.getWave();
         
         if(this.waveTimer != null)
         {
@@ -113,7 +112,7 @@ public class WaveSystem
         
         if(wave.getWaveType() == WaveType.BOSS)
         {
-            wave.getBoss().spawnMob(arena, wave.getWaveArea().getMobSpawns().get(0), arena.getWaveCount());
+            wave.getBoss().spawnMob(this.arena, wave.getWaveArea().getMobSpawns().get(0), this.arena.getWaveCount());
         }
         else
         {
@@ -126,60 +125,126 @@ public class WaveSystem
                 
                 for(BasicMonster monster : monsterList)
                 {
-                    monster.spawnMob(arena, wave.getWaveArea().getMobSpawns().get(i), arena.getWaveCount());
+                    monster.spawnMob(this.arena, wave.getWaveArea().getMobSpawns().get(i), this.arena.getWaveCount());
                 }
             }
         }
         
-        for(Location chestLocation : wave.getWaveArea().getBonusChestSpawns())
+        if(wave.getWaveType() == WaveType.NORMAL)
         {
-            Random rand = new Random();
-            boolean fill = rand.nextInt(2) == 1;
-            
-            if(fill)
+            for(Location chestLocation : wave.getWaveArea().getBonusChestSpawns())
             {
-                Block block = arena.getWorld().getBlockAt(chestLocation);
+                Random rand = new Random();
+                boolean fill = rand.nextInt(2) == 1;
+
+                Block block = this.arena.getWorld().getBlockAt(chestLocation);
+
                 block.setType(Material.CHEST);
                 Chest chest = (Chest) block.getState();
                 Inventory chestInv = chest.getBlockInventory();
-                HashMap<Integer, ItemStack> items = arena.getChestLootsRandomizer().randomLootsInSlots();
-                Iterator<Integer> keySet = items.keySet().iterator();
-                
-                while(keySet.hasNext())
+                    
+                if(fill)
                 {
-                    int slot = keySet.next();
-                    chestInv.setItem(slot, items.get(slot));
+                    HashMap<Integer, ItemStack> items = this.arena.getChestLootsRandomizer().randomLootsInSlots(false);
+
+                    for(int slot : items.keySet())
+                    {
+                        chestInv.setItem(slot, items.get(slot));
+                    }
+                }
+                else
+                {
+                    for(int i = 0; i < 6; i++)
+                    {
+                        int slot = rand.nextInt(27);
+                        chestInv.setItem(slot, new ItemStack(Material.WEB, 1));
+                    }
                 }
             }
         }
         
-        arena.broadcastMessage(Messages.waveStarted);
+        for (ArenaPlayer player : this.arena.getArenaPlayers())
+        {
+            player.updateScoreboard();
+        }
+        
+        this.arena.broadcastMessage(Messages.waveStarted);
     }
     
     public void end()
     {
-        arena.broadcastMessage(Messages.waveEnded);
+        this.arena.broadcastMessage(Messages.waveEnded);
         
-        for(ArenaPlayer player : arena.getActualPlayersList())
+        Wave wave = this.arena.getWave();
+        
+        if(wave.getWaveType() == WaveType.BOSS)
         {
-            CoinsManager.creditJoueur(player.getPlayer().getPlayerID(), 10, true);
-            
-            if(arena.getWave().getWaveType() == WaveType.NORMAL)
+            for(Location chestLocation : wave.getWaveArea().getBonusChestSpawns())
             {
-                StatsApi.increaseStat(player.getPlayer().getPlayerID(), "roguecraft", "xp", 50);
+                Block block = this.arena.getWorld().getBlockAt(chestLocation);
+                Chest chest;
+                Inventory chestInv;
+                
+                if(block.getType() == Material.CHEST)
+                {
+                    chest = (Chest) block.getState();
+                    chestInv = chest.getBlockInventory();
+                    chestInv.clear();
+                }
+                else
+                {
+                    block.setType(Material.CHEST);
+                    chest = (Chest) block.getState();
+                    chestInv = chest.getBlockInventory();
+                }
+                
+                HashMap<Integer, ItemStack> items = this.arena.getChestLootsRandomizer().randomLootsInSlots(true);
+
+                for(int slot : items.keySet())
+                {
+                    chestInv.setItem(slot, items.get(slot));
+                }
             }
-            else
+        }
+        else
+        {
+            for(Location chestLocation : wave.getWaveArea().getBonusChestSpawns())
             {
-                StatsApi.increaseStat(player.getPlayer().getPlayerID(), "roguecraft", "xp", 100);
+                Block block = this.arena.getWorld().getBlockAt(chestLocation);
+                Chest chest = (Chest) block.getState();
+                Inventory chestInv = chest.getBlockInventory();
+                chestInv.clear();
+                block.setType(Material.AIR);
             }
         }
         
-        this.endWaveTimer = new EndWaveTimer(arena);
+        for(ArenaPlayer player : this.arena.getActualPlayersList())
+        {            
+            if(this.arena.getWave().getWaveType() == WaveType.NORMAL)
+            {
+                player.addCoins(2);
+                player.addXP(50);
+            }
+            else
+            {
+                player.addCoins(10);
+                player.addXP(100);
+            }
+        }
+        
+        if(this.arena.getWave().getWaveType() == WaveType.NORMAL)
+        {
+            this.endWaveTimer = new EndWaveTimer(this.arena, 5L);
+        }
+        else
+        {
+            this.endWaveTimer = new EndWaveTimer(this.arena, 15L);
+        }
         this.endWaveTimer.start();
     }
     
     public boolean isFinished()
     {
-        return arena.getWave().getMonstersLeft() == 0;
+        return this.arena.getWave().getMonstersLeft() == 0;
     }
 }

@@ -43,16 +43,17 @@ public class LocalBow
     {
         ItemStack temp = new ItemStack(Material.BOW, 1);
         
-        temp.addEnchantment(Enchantment.ARROW_INFINITE, 1);
+        temp.addUnsafeEnchantment(Enchantment.DURABILITY, 10);
+        temp.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
         
         if(this.powerTier != 0)
-            temp.addEnchantment(Enchantment.ARROW_DAMAGE, this.powerTier);
+            temp.addUnsafeEnchantment(Enchantment.ARROW_DAMAGE, this.powerTier);
         
         if(this.kbTier != 0)
-            temp.addEnchantment(Enchantment.ARROW_KNOCKBACK, this.kbTier);
+            temp.addUnsafeEnchantment(Enchantment.ARROW_KNOCKBACK, this.kbTier);
         
         if(this.fireTier != 0)
-            temp.addEnchantment(Enchantment.ARROW_FIRE, this.fireTier);
+            temp.addUnsafeEnchantment(Enchantment.ARROW_FIRE, this.fireTier);
         
         switch(this.type)
         {

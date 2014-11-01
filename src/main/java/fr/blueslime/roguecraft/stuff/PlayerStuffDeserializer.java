@@ -42,14 +42,14 @@ public class PlayerStuffDeserializer implements JsonDeserializer<PlayerStuff>
         
         /** ------------------------------------------- **/
         
-        JsonArray jsonLeggingValues = jsonObject.get("leggings").getAsJsonArray();
+        JsonArray jsonLeggingsValues = jsonObject.get("leggings").getAsJsonArray();
         
-        int[] leggingValues = new int[jsonLeggingValues.size()];
+        int[] leggingsValues = new int[jsonLeggingsValues.size()];
         
-        for (int i = 0; i < leggingValues.length; i++)
+        for (int i = 0; i < leggingsValues.length; i++)
         {
-            JsonElement jsonLeggingValue = jsonLeggingValues.get(i);
-            leggingValues[i] = jsonLeggingValue.getAsInt();
+            JsonElement jsonLeggingsValue = jsonLeggingsValues.get(i);
+            leggingsValues[i] = jsonLeggingsValue.getAsInt();
         }
         
         /** ------------------------------------------- **/
@@ -68,7 +68,7 @@ public class PlayerStuffDeserializer implements JsonDeserializer<PlayerStuff>
         
         playerStuff.setHelmet(helmetValues);
         playerStuff.setChestplate(chestplateValues);
-        playerStuff.setLegging(leggingValues);
+        playerStuff.setLeggings(leggingsValues);
         playerStuff.setBoots(bootsValues);
         
         /** ------------------------------------------- **/

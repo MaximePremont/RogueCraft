@@ -4,7 +4,7 @@ public class PlayerStuff
 {
     private int[] helmet;
     private int[] chestplate;
-    private int[] legging;
+    private int[] leggings;
     private int[] boots;
     
     private int[] bow = null;
@@ -37,14 +37,14 @@ public class PlayerStuff
         this.chestplate = chestplate;
     }
 
-    public int[] getLegging()
+    public int[] getLeggings()
     {
-        return legging;
+        return leggings;
     }
 
-    public void setLegging(int[] legging)
+    public void setLeggings(int[] leggings)
     {
-        this.legging = legging;
+        this.leggings = leggings;
     }
 
     public int[] getBoots()
