@@ -4,7 +4,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import fr.blueslime.roguecraft.RogueCraft;
 import fr.blueslime.roguecraft.arena.Wave.WaveType;
 import java.io.BufferedReader;
 import java.io.File;
@@ -15,6 +14,7 @@ import java.util.UUID;
 import net.samagames.gameapi.GameAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.block.BlockFace;
 
 public class ArenasManager
 {    
@@ -62,12 +62,12 @@ public class ArenasManager
                 }
                 
                 JsonArray jsonBonusChestSpawns = area.getAsJsonArray("bonus-chest-spawns");
-                ArrayList<Location> bonusChestSpawns = new ArrayList<>();
+                ArrayList<BonusChest> bonusChestSpawns = new ArrayList<>();
                 
                 for(int j = 0; j < jsonBonusChestSpawns.size(); j++)
                 {
                     JsonObject bonusChest = jsonBonusChestSpawns.get(j).getAsJsonObject();
-                    bonusChestSpawns.add(new Location(arena.getWorld(), bonusChest.get("x").getAsDouble(), bonusChest.get("y").getAsDouble(), bonusChest.get("z").getAsDouble()));
+                    bonusChestSpawns.add(new BonusChest(new Location(arena.getWorld(), bonusChest.get("x").getAsDouble(), bonusChest.get("y").getAsDouble(), bonusChest.get("z").getAsDouble()), BlockFace.valueOf(bonusChest.get("face").getAsString().toUpperCase())));
                 }
                 
                 arena.registerArea(waveType, new Area(playersSpawn, mobSpawns, bonusChestSpawns));

@@ -1,6 +1,6 @@
 package fr.blueslime.roguecraft.arena;
 
-import fr.blueslime.roguecraft.monsters.BasicBoss;
+import fr.blueslime.roguecraft.monsters.boss.BasicBoss;
 import fr.blueslime.roguecraft.monsters.BasicMonster;
 import java.util.ArrayList;
 import java.util.UUID;

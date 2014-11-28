@@ -5,6 +5,7 @@ import org.bukkit.ChatColor;
 public class Messages
 {
     public static String PLUGIN_TAG = ChatColor.DARK_AQUA + "[" + ChatColor.AQUA + "RogueCraft" + ChatColor.DARK_AQUA + "] " + ChatColor.RESET;
+    public static String DEBUG_TAG = PLUGIN_TAG + ChatColor.GRAY + "[" + ChatColor.RED + "DEBUG" + ChatColor.GRAY + "] " + ChatColor.RESET;
     
     public static String notEnougthPlayers = PLUGIN_TAG + ChatColor.RED + "Il n'y a plus assez de joueurs pour commencer.";
     public static String startIn = PLUGIN_TAG + ChatColor.YELLOW + "Début du jeu dans " + ChatColor.AQUA + "${TIME}";

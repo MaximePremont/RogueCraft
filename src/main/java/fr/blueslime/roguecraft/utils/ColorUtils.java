@@ -2,9 +2,10 @@ package fr.blueslime.roguecraft.utils;
 
 import org.bukkit.Color;
 
-public class ColorUtils {
-
-    public static Color getColor(int i) {
+public class ColorUtils
+{
+    public static Color getColor(int i)
+    {
         Color c = null;
 
         if (i == 1) {

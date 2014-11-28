@@ -11,7 +11,14 @@ public class RCPreJoinPlayerEvent implements Listener
     @EventHandler
     public void event(PreJoinPlayerEvent event)
     {
-        if(!RogueCraft.getPlugin().getArena().canJoin())
+        if(RogueCraft.getPlugin().getArena().getArenaPlayers().size() >= RogueCraft.getPlugin().getArena().getTotalMaxPlayers())
+        {
             event.refuse(ChatColor.RED + "L'arène est pleine.");
+        }
+        
+        if(!RogueCraft.getPlugin().getArena().hasClass(event.getPlayer()))
+        {
+            event.refuse(ChatColor.RED + "Vous devez posséder une classe pour pouvoir jouer.");
+        }
     }
 }

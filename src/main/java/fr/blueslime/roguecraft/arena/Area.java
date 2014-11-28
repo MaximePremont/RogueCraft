@@ -5,18 +5,18 @@ import org.bukkit.Location;
 
 public class Area
 {
-    private final ArrayList<Location> bonusChestSpawns;
+    private final ArrayList<BonusChest> bonusChestSpawns;
     private final ArrayList<Location> mobSpawns;
     private final Location playersSpawn;
     
-    public Area(Location playersSpawn, ArrayList<Location> mobSpawns, ArrayList<Location> bonusChestSpawns)
+    public Area(Location playersSpawn, ArrayList<Location> mobSpawns, ArrayList<BonusChest> bonusChestSpawns)
     {
         this.playersSpawn = playersSpawn;
         this.mobSpawns = mobSpawns;
         this.bonusChestSpawns = bonusChestSpawns;
     }
     
-    public ArrayList<Location> getBonusChestSpawns()
+    public ArrayList<BonusChest> getBonusChestSpawns()
     {
         return this.bonusChestSpawns;
     }

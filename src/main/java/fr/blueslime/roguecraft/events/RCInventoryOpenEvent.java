@@ -2,8 +2,8 @@ package fr.blueslime.roguecraft.events;
 
 import fr.blueslime.roguecraft.RogueCraft;
 import fr.blueslime.roguecraft.arena.Arena;
-import fr.blueslime.roguecraft.arena.Arena.Role;
 import fr.blueslime.roguecraft.arena.ArenaPlayer;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -17,14 +17,24 @@ public class RCInventoryOpenEvent implements Listener
     {
         Player player = (Player) event.getPlayer();
         Arena arena = RogueCraft.getPlugin().getArena();
-        ArenaPlayer aPlayer = arena.getPlayer(player);
-                
-        if(aPlayer.getRole() == Role.PLAYER)
+        
+        if(arena.hasPlayer(event.getPlayer().getUniqueId()))
         {
+            ArenaPlayer aPlayer = arena.getPlayer(player);
+            
+            if(aPlayer.getPlayer().getGameMode() == GameMode.CREATIVE)
+            {
+                event.setCancelled(true);
+            }
+            
             if (!event.getInventory().getType().equals(InventoryType.PLAYER) || !event.getInventory().getType().equals(InventoryType.CHEST))
             {
                 return;
             }
+        }
+        else
+        {
+            event.setCancelled(true);
         }
         
         event.setCancelled(true);

@@ -58,6 +58,14 @@ public class RCPlayerInteractEvent implements Listener
                     }
                 }
             }
+            
+            if(event.getClickedBlock() != null)
+            {
+                if(event.getClickedBlock().getType() == Material.WOODEN_DOOR || event.getClickedBlock().getType() == Material.FENCE_GATE || event.getClickedBlock().getType() == Material.TRAP_DOOR)
+                {
+                    event.setCancelled(true);
+                }
+            }
         }
     }
 }

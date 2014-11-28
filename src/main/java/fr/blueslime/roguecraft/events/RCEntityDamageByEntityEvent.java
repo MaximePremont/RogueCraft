@@ -2,10 +2,9 @@ package fr.blueslime.roguecraft.events;
 
 import fr.blueslime.roguecraft.RogueCraft;
 import fr.blueslime.roguecraft.arena.Arena;
-import fr.blueslime.roguecraft.arena.Arena.Role;
-import fr.blueslime.roguecraft.arena.ArenaPlayer;
 import fr.blueslime.roguecraft.monsters.BasicMonster;
 import java.util.UUID;
+import me.confuser.barapi.BarAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -61,81 +60,84 @@ public class RCEntityDamageByEntityEvent implements Listener
                         Bukkit.getLogger().severe("Player damaged by an entity whereas not spawned by the plugin !");
                     }
                 }
-
-                if(damaged.isDead())
-                {
-                    arena.loseMessage(damaged);
-
-                    if(arena.getActualPlayers() == 0)
-                    {
-                        arena.finish();
-                    }
-                }
+            }
+            else
+            {
+                event.setCancelled(true);
             }
         }
         else
         {
             LivingEntity damaged = (LivingEntity) event.getEntity();
             
-            if(damaged.hasMetadata("RC-ARENA"))
+            if(damaged.hasMetadata("RC-MOBUUID"))
             {                
                 if(event.getDamager() instanceof Player)
                 {
                     Arena arena = RogueCraft.getPlugin().getArena();
                     Player damager = (Player) event.getDamager();
                     
-                    if(arena.hasPlayer(event.getEntity().getUniqueId()))
-                    {
-                        ArenaPlayer player = arena.getPlayer(damager);
-                        
-                        if(player.getRole() == Role.PLAYER)
+                    if(arena.hasPlayer(damager.getUniqueId()))
+                    {                        
+                        if(damager.getItemInHand() != null)
                         {
-                            if(damager.getItemInHand() != null)
+                            ItemStack stack = damager.getItemInHand();
+
+                            if(stack.getType() == Material.IRON_SWORD)
                             {
-                                ItemStack stack = damager.getItemInHand();
-
-                                if(stack.getType() == Material.IRON_SWORD)
+                                if(stack.getItemMeta() != null && stack.getItemMeta().getDisplayName() != null)
                                 {
-                                    if(stack.getItemMeta() != null && stack.getItemMeta().getDisplayName() != null)
-                                    {
-                                        String lore = ChatColor.stripColor(stack.getItemMeta().getDisplayName());
-                                        
-                                        switch (lore)
-                                        {
-                                            case "Epée empoisonnée":
-                                                damaged.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 120, 1));
-                                                break;
+                                    String lore = ChatColor.stripColor(stack.getItemMeta().getDisplayName());
 
-                                            case "Epée de glace":
-                                                damaged.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 120, 1));
-                                                break;
-                                        }
+                                    switch (lore)
+                                    {
+                                        case "Epée empoisonnée":
+                                            damaged.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 120, 1));
+                                            break;
+
+                                        case "Epée de glace":
+                                            damaged.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 120, 1));
+                                            break;
                                     }
                                 }
-                                else if(stack.getType() == Material.BOW)
+                            }
+                            else if(stack.getType() == Material.BOW)
+                            {
+                                if(stack.getItemMeta() != null && stack.getItemMeta().getDisplayName() != null)
                                 {
-                                    if(stack.getItemMeta() != null && stack.getItemMeta().getDisplayName() != null)
-                                    {
-                                        String lore = ChatColor.stripColor(stack.getItemMeta().getDisplayName());
-                                        
-                                        switch (lore)
-                                        {
-                                            case "Arc empoisonné":
-                                                damaged.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 120, 1));
-                                                break;
+                                    String lore = ChatColor.stripColor(stack.getItemMeta().getDisplayName());
 
-                                            case "Arc de glace":
-                                                damaged.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 120, 1));
-                                                break;
-                                        }
+                                    switch (lore)
+                                    {
+                                        case "Arc empoisonné":
+                                            damaged.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 120, 1));
+                                            break;
+
+                                        case "Arc de glace":
+                                            damaged.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 120, 1));
+                                            break;
                                     }
                                 }
                             }
                         }
-                        else
-                        {
-                            event.setDamage(0.0D);
-                        }
+                    }
+                    else
+                    {
+                       event.setCancelled(true);
+                    }
+                }
+                else if(event.getDamager().getType() == EntityType.CREEPER)
+                {
+                    event.setCancelled(true);
+                }
+                
+                if(damaged.hasMetadata("RC-BOSS"))
+                {
+                    LivingEntity entity = (LivingEntity) event.getEntity();
+                    
+                    for(Player player : Bukkit.getOnlinePlayers())
+                    {
+                        BarAPI.setHealth(player, ((float) entity.getHealth()) / ((float) entity.getMaxHealth()) * 100);
                     }
                 }
             }

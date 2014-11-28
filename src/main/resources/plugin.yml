@@ -2,7 +2,7 @@ name: RogueCraft
 main: fr.blueslime.roguecraft.RogueCraft
 version: 1.0
 
-depend: [MasterBundle]
+depend: [MasterBundle, BarAPI]
 
 author: BlueSlime
 website: http://blueslime.fr

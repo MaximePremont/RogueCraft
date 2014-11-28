@@ -12,6 +12,16 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 
 public class ItemUtils
 {
+    /**
+     * Create in a given inventory an item with the given characteristics
+     * 
+     * @param material ItemStack to display
+     * @param quantity Quantity in the stack
+     * @param name Display name of the item
+     * @param lores Lores of the item (null if none)
+     * @param magical Is the item have to be matical
+     * @return The displayed item
+     */
     public static ItemStack createDisplay(Material material, int quantity, String name, ArrayList<String> lores, boolean magical)
     {
         ItemStack item = new ItemStack(material, quantity);
@@ -29,6 +39,17 @@ public class ItemUtils
         return item;
     }
     
+    /**
+     * Create in a given inventory an item with the given characteristics
+     * 
+     * @param material ItemStack to display
+     * @param quantity Quantity in the stack
+     * @param datatag Damage value of the ItemStack
+     * @param name Display name of the item
+     * @param lores Lores of the item (null if none)
+     * @param magical Is the item have to be matical
+     * @return The displayed item
+     */
     public static ItemStack createDisplay(Material material, int quantity, int datatag, String name, ArrayList<String> lores, boolean magical)
     {
         ItemStack item = new ItemStack(material, quantity, (short) datatag);
@@ -46,6 +67,18 @@ public class ItemUtils
         return item;
     }
     
+    /**
+     * Create in a given inventory an item with the given characteristics
+     * 
+     * @param material ItemStack to display
+     * @param inv The inventory
+     * @param quantity Quantity in the stack
+     * @param slot Slot in the inventory
+     * @param name Display name of the item
+     * @param lores Lores of the item (null if none)
+     * @param magical Is the item have to be matical
+     * @return The displayed item
+     */
     public static ItemStack createDisplay(Material material, Inventory inv, int quantity, int slot, String name, ArrayList<String> lores, boolean magical)
     {
         ItemStack item = new ItemStack(material, quantity);
@@ -73,6 +106,15 @@ public class ItemUtils
         return item;
     }
     
+    /**
+     * Color a leather armor piece with a RGB color
+     * 
+     * @param item
+     * @param red
+     * @param green
+     * @param blue
+     * @return 
+     */
     public static ItemStack setColor(ItemStack item, int red, int green, int blue)
     {
         LeatherArmorMeta lam = (LeatherArmorMeta) item.getItemMeta();
@@ -82,6 +124,12 @@ public class ItemUtils
         return item;
     }
     
+    /**
+     * Return if a given ItemStack is an armor
+     * 
+     * @param stack
+     * @return 
+     */
     public static boolean isArmor(ItemStack stack)
     {
         if(stack.getType() == Material.LEATHER_HELMET || stack.getType() == Material.LEATHER_CHESTPLATE || stack.getType() == Material.LEATHER_LEGGINGS || stack.getType() == Material.LEATHER_BOOTS)
@@ -98,12 +146,15 @@ public class ItemUtils
             return false;
     }
     
+    /**
+     * Return if a given ItemStack is a sword
+     * 
+     * @param stack
+     * @return 
+     */
     public static boolean isSword(ItemStack stack)
     {
-        if(stack.getType() == Material.WOOD_SWORD || stack.getType() == Material.STONE_SWORD || stack.getType() == Material.IRON_SWORD || stack.getType() == Material.GOLD_SWORD || stack.getType() == Material.DIAMOND_SWORD)
-            return true;
-        else
-            return false;
+        return stack.getType() == Material.WOOD_SWORD || stack.getType() == Material.STONE_SWORD || stack.getType() == Material.IRON_SWORD || stack.getType() == Material.GOLD_SWORD || stack.getType() == Material.DIAMOND_SWORD;
     }
 }
 

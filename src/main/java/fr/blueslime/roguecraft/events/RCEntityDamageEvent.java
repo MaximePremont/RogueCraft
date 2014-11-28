@@ -22,17 +22,21 @@ public class RCEntityDamageEvent implements Listener
             {
                 ArenaPlayer player = arena.getPlayer((Player) event.getEntity());
 
-                if(player.getRole() == Arena.Role.PLAYER)
+                if(event.getCause() == DamageCause.VOID)
+                    player.getPlayer().getPlayer().damage(1000.0D);
+                if(event.getCause() == DamageCause.FALL)
+                    event.setCancelled(true);
+            }
+            else
+            {
+                if(event.getCause() == DamageCause.VOID)
                 {
-                    if(event.getCause() == DamageCause.VOID)
-                        player.getPlayer().getPlayer().damage(1000.0D);
+                    event.setCancelled(true);
+                    ((Player) event.getEntity()).teleport(arena.getWave().getWaveArea().getPlayersSpawn());
                 }
                 else
                 {
-                    if(event.getCause() == DamageCause.VOID)
-                        player.getPlayer().getPlayer().teleport(arena.getWave().getWaveArea().getPlayersSpawn());
-                    else
-                        event.setDamage(0.0D);
+                    event.setCancelled(true);
                 }
             }
         }

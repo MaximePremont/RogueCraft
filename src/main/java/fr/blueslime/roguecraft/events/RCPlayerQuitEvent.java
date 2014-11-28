@@ -2,8 +2,8 @@ package fr.blueslime.roguecraft.events;
 
 import fr.blueslime.roguecraft.RogueCraft;
 import fr.blueslime.roguecraft.arena.Arena;
-import fr.blueslime.roguecraft.arena.Arena.Role;
 import fr.blueslime.roguecraft.arena.ArenaPlayer;
+import net.samagames.gameapi.GameAPI;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -14,12 +14,12 @@ public class RCPlayerQuitEvent implements Listener
     public void event(PlayerQuitEvent event)
     {
         Arena arena = RogueCraft.getPlugin().getArena();
-        ArenaPlayer player = arena.getPlayer(event.getPlayer());
         
-        if(player.getRole() == Role.PLAYER)
+        if(arena.hasPlayer(event.getPlayer().getUniqueId()))
         {
-            arena.stumpPlayer(arena.getPlayer(event.getPlayer()));
-            arena.getNetworkManager().refreshArena(arena);
+            ArenaPlayer player = arena.getPlayer(event.getPlayer());
+            arena.lose(player.getPlayer());
+            GameAPI.getManager().refreshArena(arena);
         }
     }
 }

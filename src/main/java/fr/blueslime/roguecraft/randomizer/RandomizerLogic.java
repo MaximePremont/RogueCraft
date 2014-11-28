@@ -1,20 +1,16 @@
 package fr.blueslime.roguecraft.randomizer;
 
 import fr.blueslime.roguecraft.arena.Arena;
-import fr.blueslime.roguecraft.monsters.BasicBoss;
+import fr.blueslime.roguecraft.monsters.boss.BasicBoss;
 import fr.blueslime.roguecraft.monsters.BasicMonster;
 import java.util.ArrayList;
-import java.util.Random;
 
 public class RandomizerLogic
 {
-    public ArrayList<BasicMonster> prepareMobs(Arena arena)
+    public ArrayList<BasicMonster> prepareMobs(Arena arena, int mobsCount)
     {
         ArrayList<BasicMonster> monsters = new ArrayList<>();
-        Random rand = new Random();
-        
-        int mobsCount = arena.getWaveCount() + (rand.nextInt(3) + 1);
-                
+                        
         for(int i = 0; i < mobsCount; i++)
         {
             monsters.add(arena.getMonsterRandomizer().randomMonster(arena));

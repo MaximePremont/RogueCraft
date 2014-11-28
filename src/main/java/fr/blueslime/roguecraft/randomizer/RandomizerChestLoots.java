@@ -9,6 +9,7 @@ import org.bukkit.Material;
 import org.bukkit.SkullType;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionType;
@@ -24,19 +25,17 @@ public class RandomizerChestLoots
         ItemStack fishingSwag = new ItemStack(Material.FISHING_ROD);
         fishingSwag.addUnsafeEnchantment(Enchantment.FIRE_ASPECT, 1);
         fishingSwag.addUnsafeEnchantment(Enchantment.KNOCKBACK, 3);
-        fishingSwag.getItemMeta().setDisplayName(ChatColor.GOLD + "" + ChatColor.BOLD + "--[ Fishing Swag ]--");
+        fishingSwag.getItemMeta().setDisplayName(ChatColor.GOLD + "--[ Canne à Swag ]--");
         
-        ItemStack cece35bHead = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
-        SkullMeta headMeta = (SkullMeta) cece35bHead.getItemMeta();
-        headMeta.setOwner("cece35b");
-        cece35bHead.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 5);
-        cece35bHead.getItemMeta().setDisplayName(ChatColor.BLUE + "" + ChatColor.BOLD + "--[ Tête de BlueSlime ]--");
+        ItemStack wool = new ItemStack(Material.WOOL, 1);
+        wool.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 5);
+        wool.getItemMeta().setDisplayName(ChatColor.BLUE + "--[ Stainte Laine ]--");
         
-        this.registerItem(new RandomItem(new ItemStack(Material.WEB), 1, 400));
-        this.registerItem(new RandomItem(new ItemStack(Material.FLINT), 1, 400));
+        this.registerItem(new RandomItem(new ItemStack(Material.WEB), 1, 300));
+        this.registerItem(new RandomItem(new ItemStack(Material.FLINT), 1, 300));
         this.registerItem(new RandomItem(new ItemStack(Material.COOKED_CHICKEN), 1, 450));
         this.registerItem(new RandomItem(new ItemStack(Material.COOKED_BEEF), 1, 500));
-        this.registerItem(new RandomItem(new ItemStack(Material.RAW_BEEF), 1, 650));
+        this.registerItem(new RandomItem(new ItemStack(Material.RAW_BEEF), 1, 300));
         
         this.registerItem(new RandomItem(new Potion(PotionType.STRENGTH).toItemStack(1), 2, 200));
         this.registerItem(new RandomItem(new Potion(PotionType.REGEN).toItemStack(1), 2, 200));
@@ -47,7 +46,7 @@ public class RandomizerChestLoots
         this.registerItem(new RandomItem(new Potion(PotionType.INSTANT_HEAL).toItemStack(1), 2, 300));
         this.registerItem(new RandomItem(new Potion(PotionType.INSTANT_HEAL).splash().toItemStack(1), 2, 300));
         
-        this.registerItem(new RandomItem(cece35bHead, 3, 10));
+        this.registerItem(new RandomItem(wool, 3, 10));
         this.registerItem(new RandomItem(RogueCraft.getPlugin().getStuffManager().getBedrockPotion(), 3, 10));
         this.registerItem(new RandomItem(fishingSwag, 3, 100));
         this.registerItem(new RandomItem(new ItemStack(Material.GOLDEN_APPLE), 3, 100));
@@ -99,7 +98,7 @@ public class RandomizerChestLoots
                 
             if(item.getValue() == value)
             {
-                int freq = rand.nextInt(1000);
+                int freq = rand.nextInt(700);
 
                 if(freq != 0 && freq <= item.getChance())
                 {

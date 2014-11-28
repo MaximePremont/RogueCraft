@@ -9,12 +9,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import net.minecraft.server.v1_7_R4.Entity;
-import net.minecraft.server.v1_7_R4.EntityTypes;
 import net.samagames.gameapi.GameAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -64,7 +58,6 @@ public class RogueCraft extends JavaPlugin
                         
         this.getCommand("rc").setExecutor(new CommandRogueCraft());
         this.registerEvents();
-        this.registerEntity("WitherBoss", 64, CustomEntityWither.class);
         
         GameAPI.registerGame("roguecraft", comPort, bungeeName);
         GameAPI.getManager().sendArenas();
@@ -90,31 +83,14 @@ public class RogueCraft extends JavaPlugin
         Bukkit.getPluginManager().registerEvents(new RCEntityDeathEvent(), this);
         Bukkit.getPluginManager().registerEvents(new RCFinishJoinPlayerEvent(), this);
         Bukkit.getPluginManager().registerEvents(new RCPreJoinPlayerEvent(), this);
-    }
-    
-    public void registerEntity(String name, int id, Class<? extends Entity> customClass)
-    {
-        try
-        {
-            List<Map<?, ?>> dataMaps = new ArrayList<>();
-            
-            for (Field f : EntityTypes.class.getDeclaredFields())
-            {
-                if (f.getType().getSimpleName().equals(Map.class.getSimpleName()))
-                {
-                    f.setAccessible(true);
-                    dataMaps.add((Map<?, ?>) f.get(null));
-                }
-            }
-
-            ((Map<Class<? extends Entity>, String>) dataMaps.get(1)).put(customClass, name);
-            ((Map<Class<? extends Entity>, Integer>) dataMaps.get(3)).put(customClass, id);
-
-        }
-        catch (IllegalAccessException | IllegalArgumentException | SecurityException e) 
-        {
-            e.printStackTrace();
-        }
+        Bukkit.getPluginManager().registerEvents(new RCPlayerPickupItemEvent(), this);
+        Bukkit.getPluginManager().registerEvents(new RCEntityRegainHealthEvent(), this);
+        Bukkit.getPluginManager().registerEvents(new RCFoodLevelChangeEvent(), this);
+        Bukkit.getPluginManager().registerEvents(new RCJoinModEvent(), this);
+        Bukkit.getPluginManager().registerEvents(new RCEntityTargetEvent(), this);
+        Bukkit.getPluginManager().registerEvents(new RCEntityCombustEvent(), this);
+        Bukkit.getPluginManager().registerEvents(new RCEntityChangeBlockEvent(), this);
+        Bukkit.getPluginManager().registerEvents(new RCProjectileHitEvent(), this);
     }
 
     public void kickPlayer(final Player player)

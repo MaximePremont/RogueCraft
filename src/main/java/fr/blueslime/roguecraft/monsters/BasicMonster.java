@@ -3,7 +3,6 @@ package fr.blueslime.roguecraft.monsters;
 import fr.blueslime.roguecraft.RogueCraft;
 import fr.blueslime.roguecraft.arena.Arena;
 import java.util.UUID;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.EntityType;
@@ -29,17 +28,16 @@ public class BasicMonster implements Cloneable
     
     public LivingEntity spawnMob(Arena arena, Location location, int waveCount)
     {
-        LivingEntity lEntity = Bukkit.getWorld("world").spawnCreature(location, this.typeOfMob);
+        LivingEntity lEntity = location.getWorld().spawnCreature(location, this.typeOfMob);
 
         double health = this.getCalculatedHealth(waveCount);
         lEntity.setMaxHealth(health + 1);
         lEntity.setHealth(health);
         lEntity.setMetadata("RC-MOBUUID", new FixedMetadataValue(RogueCraft.getPlugin(), this.uuid.toString()));
-        lEntity.setMetadata("RC-ARENA", new FixedMetadataValue(RogueCraft.getPlugin(), arena.getUUID().toString()));
 
         if(this.typeOfMob == EntityType.SPIDER || this.typeOfMob == EntityType.PIG_ZOMBIE)
         {
-            ((Creature) lEntity).setTarget(arena.getActualPlayersList().get(0).getPlayer().getPlayer());
+            ((Creature) lEntity).setTarget(arena.getArenaPlayers().get(0).getPlayer().getPlayer());
         }
 
         EntityEquipment ee = lEntity.getEquipment();
@@ -123,12 +121,12 @@ public class BasicMonster implements Cloneable
     
     public double getCalculatedHealth(int waveCount)
     {
-        return this.baseHealth + (0.3 * waveCount);
+        return this.baseHealth + (0.2 * waveCount);
     }
 
     public double getCalculatedDamage(double baseDamage, int waveCount)
     {
-        return baseDamage + (1.5 / waveCount);
+        return baseDamage + (0.5 / waveCount);
     }
     
     @Override

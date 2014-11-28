@@ -5,15 +5,21 @@ import fr.blueslime.roguecraft.arena.Arena;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
 
-public class RCPlayerRespawnEvent implements Listener
+public class RCPlayerPickupItemEvent implements Listener
 {
     @EventHandler
-    public void event(PlayerRespawnEvent event)
+    public void event(PlayerPickupItemEvent event)
     {
+        event.setCancelled(true);
+        
         Player player = event.getPlayer();
         Arena arena = RogueCraft.getPlugin().getArena();
-        arena.loseRespawn(player);
+        
+        if(arena.hasPlayer(player.getUniqueId()))
+        {
+            event.setCancelled(false);
+        }
     }
 }

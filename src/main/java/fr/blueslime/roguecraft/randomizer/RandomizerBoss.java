@@ -1,7 +1,7 @@
 package fr.blueslime.roguecraft.randomizer;
 
 import fr.blueslime.roguecraft.arena.Arena;
-import fr.blueslime.roguecraft.monsters.BasicBoss;
+import fr.blueslime.roguecraft.monsters.boss.BasicBoss;
 import java.util.HashMap;
 import java.util.Random;
 import org.bukkit.Material;
@@ -18,11 +18,6 @@ public class RandomizerBoss
         EntityType type = this.takeRandomEntityType();
         BasicBoss boss = new BasicBoss(type);
         ItemStack[] armor = this.randomArmor(arena.getWaveCount());
-        
-        boss.setArmorHelmet(armor[0]);
-        boss.setArmorChestplate(armor[1]);
-        boss.setArmorLeggings(armor[2]);
-        boss.setArmorBoots(armor[3]);
         
         if(type == EntityType.ZOMBIE)
         {
@@ -51,7 +46,14 @@ public class RandomizerBoss
             head.setItemMeta(headMeta);
             boss.setArmorHelmet(head);
         }
+        else
+        {
+            boss.setArmorHelmet(armor[0]);
+        }
         
+        boss.setArmorChestplate(armor[1]);
+        boss.setArmorLeggings(armor[2]);
+        boss.setArmorBoots(armor[3]);
         boss.setWeapon(this.randomWeapon(arena.getWaveCount()));
         
         return boss;
@@ -61,7 +63,7 @@ public class RandomizerBoss
     {
         Random rand = new Random();
         int so = rand.nextInt(10) + 1;
-        
+
         if(so <= 3)
             return EntityType.ZOMBIE;
         else

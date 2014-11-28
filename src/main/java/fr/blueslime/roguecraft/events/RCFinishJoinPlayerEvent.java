@@ -11,15 +11,12 @@ public class RCFinishJoinPlayerEvent implements Listener
     @EventHandler
     public void event(FinishJoinPlayerEvent event)
     {
-        if(RogueCraft.getPlugin().getArena().canJoin())
+        if(RogueCraft.getPlugin().getArena().getArenaPlayers().size() >= RogueCraft.getPlugin().getArena().getTotalMaxPlayers())
         {
             event.refuse(ChatColor.RED + "L'arène est pleine.");
             return;
         }
         
-        String response = RogueCraft.getPlugin().getArena().joinPlayer(event.getPlayer());
-        
-        if(!response.equals("OK"))
-            event.refuse(ChatColor.RED + response);
+        RogueCraft.getPlugin().getArena().joinPlayer(event.getPlayer());
     }
 }

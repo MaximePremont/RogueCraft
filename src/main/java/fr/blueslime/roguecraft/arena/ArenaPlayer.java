@@ -3,7 +3,6 @@ package fr.blueslime.roguecraft.arena;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import fr.blueslime.roguecraft.RogueCraft;
-import fr.blueslime.roguecraft.arena.Arena.Role;
 import fr.blueslime.roguecraft.stuff.PlayerStuff;
 import fr.blueslime.roguecraft.stuff.PlayerStuffDeserializer;
 import fr.blueslime.roguecraft.stuff.StuffManager.PlayerClass;
@@ -13,7 +12,6 @@ import net.zyuiop.coinsManager.CoinsManager;
 import net.zyuiop.statsapi.StatsApi;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -29,7 +27,6 @@ public class ArenaPlayer
     private final Arena arena;
     private final Player player;
     private final UUID playerId;
-    private Role role;
     private final Scoreboard board;
     private final Objective bar;
     
@@ -40,13 +37,15 @@ public class ArenaPlayer
     
     private int coins;
     private int xp;
+    private int mobs;
     
     public ArenaPlayer(Arena arena, Player player)
     {
         this.arena = arena;
         this.player = player;
         this.playerId = player.getUniqueId();
-        this.role = Role.PLAYER;
+        
+        player.getInventory().clear();
         
         ShardedJedis redis = FastJedis.jedis();
         
@@ -54,7 +53,8 @@ public class ArenaPlayer
         gsonBuilder.registerTypeAdapter(PlayerStuff.class, new PlayerStuffDeserializer());
         
         Gson gson = gsonBuilder.create();
-        this.pStuff = gson.fromJson(redis.get("roguecraft:properties:" + player.getUniqueId()), PlayerStuff.class);
+        String stuff = redis.get("roguecraft:properties:" + player.getUniqueId());
+        this.pStuff = gson.fromJson(stuff, PlayerStuff.class);
         
         redis.disconnect();
         
@@ -68,7 +68,9 @@ public class ArenaPlayer
     }
     
     public void giveStuff()
-    {        
+    {
+        this.arena.broadcastMessage(ChatColor.RED + "[DEBUG] Giving stuff to " + this.player.getName());
+        
         this.armor = RogueCraft.getPlugin().getStuffManager().createArmor(this);
         this.weapon = RogueCraft.getPlugin().getStuffManager().createWeapon(this);
         
@@ -141,7 +143,7 @@ public class ArenaPlayer
             @Override
             public void run()
             {
-                coins += CoinsManager.syncCreditJoueur(player.getUniqueId(), c, true, true);
+                coins += CoinsManager.syncCreditJoueur(player.getUniqueId(), c, true, true, "Fin d'une vague");
             }
         });
         
@@ -155,19 +157,27 @@ public class ArenaPlayer
         updateScoreboard();
     }
     
+    public void increaseKilledMobsCount()
+    {
+        this.mobs++;
+    }
+    
+    public void updateWaveStat()
+    {
+        int actual = StatsApi.getPlayerStat(this.playerId, "roguecraft", "waves");
+        StatsApi.decreaseStat(this.playerId, "roguecraft", "waves", actual);
+        StatsApi.increaseStat(this.playerId, "roguecraft", "waves", this.arena.getWaveCount());
+    }
+    
     public void updateScoreboard()
     {
         this.bar.getScore(Bukkit.getOfflinePlayer(ChatColor.GOLD + "Vague:")).setScore(this.arena.getWaveCount());
         this.bar.getScore(Bukkit.getOfflinePlayer(ChatColor.GOLD + "Mobs:")).setScore(this.arena.getWave().getMonstersLeft());
         this.bar.getScore(Bukkit.getOfflinePlayer(ChatColor.GOLD + "Coins:")).setScore(this.coins);
         this.bar.getScore(Bukkit.getOfflinePlayer(ChatColor.GOLD + "XP:")).setScore(this.xp);
+        this.bar.getScore(Bukkit.getOfflinePlayer(ChatColor.GOLD + "Mobs tués:")).setScore(this.mobs);
     }
 
-    public void setRole(Role role)
-    {
-        this.role = role;
-    }
-    
     public void setPlayerClass(PlayerClass pClass)
     {
         this.pClass = pClass;
@@ -182,12 +192,7 @@ public class ArenaPlayer
     {
         return this.playerId;
     }
-    
-    public Role getRole()
-    {
-        return this.role;
-    }
-        
+ 
     public PlayerClass getPlayerClass()
     {
         return this.pClass;

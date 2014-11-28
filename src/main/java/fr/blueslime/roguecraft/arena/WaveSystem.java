@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.math.IntMath;
 import fr.blueslime.roguecraft.Messages;
 import fr.blueslime.roguecraft.arena.Wave.WaveType;
-import fr.blueslime.roguecraft.monsters.BasicBoss;
+import fr.blueslime.roguecraft.monsters.boss.BasicBoss;
 import fr.blueslime.roguecraft.monsters.BasicMonster;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+import net.zyuiop.MasterBundle.StarsManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -34,6 +35,7 @@ public class WaveSystem
     
     public void next()
     {
+        endCallback();
         this.arena.upWaveCount();
         
         if(this.endWaveTimer != null)
@@ -44,6 +46,9 @@ public class WaveSystem
         
         for(Player player : Bukkit.getOnlinePlayers())
         {
+            if(this.arena.hasPlayer(player.getUniqueId()))
+                this.arena.getPlayer(player).repearStuff();
+            
             player.teleport(new Location(this.arena.getWorld(), 0.0D, 250.0D, 0.0D));
         }
         
@@ -65,9 +70,12 @@ public class WaveSystem
         
         Bukkit.getLogger().info("[RogueCraft-WaveSystem] Creating mob list...");
         
+        Random rand = new Random();
+        
         if(waveType == WaveType.NORMAL)
         {
-            ArrayList<BasicMonster> monsters = this.arena.getLogicRandomizer().prepareMobs(this.arena);
+            int mobsCount = (arena.getWaveCount() + (rand.nextInt(3) + 1)) * (arena.getActualPlayers() / (int) 2.42);
+            ArrayList<BasicMonster> monsters = this.arena.getLogicRandomizer().prepareMobs(this.arena, mobsCount);
 
             for(BasicMonster monster : monsters)
             {
@@ -83,7 +91,7 @@ public class WaveSystem
         Bukkit.getLogger().info("[RogueCraft-WaveSystem] Mob list created!");
         Bukkit.getLogger().info("[RogueCraft-WaveSystem] Teleporting players...");
         
-        for(ArenaPlayer player : this.arena.getArenaPlayers())
+        for(Player player : Bukkit.getOnlinePlayers())
         {
             player.getPlayer().getPlayer().teleport(area.getPlayersSpawn());
         }
@@ -92,6 +100,12 @@ public class WaveSystem
         
         this.arena.setActualArea(area);
         this.arena.setWave(wave);
+        
+        for (ArenaPlayer player : this.arena.getArenaPlayers())
+        {
+            player.updateScoreboard();
+        }
+        
         this.waveTimer = new WaveTimer(this.arena);
         this.waveTimer.start();
         
@@ -132,33 +146,23 @@ public class WaveSystem
         
         if(wave.getWaveType() == WaveType.NORMAL)
         {
-            for(Location chestLocation : wave.getWaveArea().getBonusChestSpawns())
+            for(BonusChest chestLocation : wave.getWaveArea().getBonusChestSpawns())
             {
-                Random rand = new Random();
-                boolean fill = rand.nextInt(2) == 1;
-
-                Block block = this.arena.getWorld().getBlockAt(chestLocation);
-
+                Block block = this.arena.getWorld().getBlockAt(chestLocation.getLocation());
                 block.setType(Material.CHEST);
                 Chest chest = (Chest) block.getState();
+                
+                org.bukkit.material.Chest materialChest = new org.bukkit.material.Chest(Material.CHEST);
+                materialChest.setFacingDirection(chestLocation.getFace());
+                chest.setData(materialChest);
+                
                 Inventory chestInv = chest.getBlockInventory();
-                    
-                if(fill)
-                {
-                    HashMap<Integer, ItemStack> items = this.arena.getChestLootsRandomizer().randomLootsInSlots(false);
 
-                    for(int slot : items.keySet())
-                    {
-                        chestInv.setItem(slot, items.get(slot));
-                    }
-                }
-                else
+                HashMap<Integer, ItemStack> items = this.arena.getChestLootsRandomizer().randomLootsInSlots(false);
+
+                for(int slot : items.keySet())
                 {
-                    for(int i = 0; i < 6; i++)
-                    {
-                        int slot = rand.nextInt(27);
-                        chestInv.setItem(slot, new ItemStack(Material.WEB, 1));
-                    }
+                    chestInv.setItem(slot, items.get(slot));
                 }
             }
         }
@@ -179,24 +183,17 @@ public class WaveSystem
         
         if(wave.getWaveType() == WaveType.BOSS)
         {
-            for(Location chestLocation : wave.getWaveArea().getBonusChestSpawns())
+            for(BonusChest chestLocation : wave.getWaveArea().getBonusChestSpawns())
             {
-                Block block = this.arena.getWorld().getBlockAt(chestLocation);
-                Chest chest;
-                Inventory chestInv;
+                Block block = this.arena.getWorld().getBlockAt(chestLocation.getLocation());
+                block.setType(Material.CHEST);
+                Chest chest = (Chest) block.getState();
                 
-                if(block.getType() == Material.CHEST)
-                {
-                    chest = (Chest) block.getState();
-                    chestInv = chest.getBlockInventory();
-                    chestInv.clear();
-                }
-                else
-                {
-                    block.setType(Material.CHEST);
-                    chest = (Chest) block.getState();
-                    chestInv = chest.getBlockInventory();
-                }
+                org.bukkit.material.Chest materialChest = new org.bukkit.material.Chest(Material.CHEST);
+                materialChest.setFacingDirection(chestLocation.getFace());
+                chest.setData(materialChest);
+                
+                Inventory chestInv = chest.getBlockInventory();
                 
                 HashMap<Integer, ItemStack> items = this.arena.getChestLootsRandomizer().randomLootsInSlots(true);
 
@@ -206,19 +203,8 @@ public class WaveSystem
                 }
             }
         }
-        else
-        {
-            for(Location chestLocation : wave.getWaveArea().getBonusChestSpawns())
-            {
-                Block block = this.arena.getWorld().getBlockAt(chestLocation);
-                Chest chest = (Chest) block.getState();
-                Inventory chestInv = chest.getBlockInventory();
-                chestInv.clear();
-                block.setType(Material.AIR);
-            }
-        }
         
-        for(ArenaPlayer player : this.arena.getActualPlayersList())
+        for(ArenaPlayer player : this.arena.getArenaPlayers())
         {            
             if(this.arena.getWave().getWaveType() == WaveType.NORMAL)
             {
@@ -227,7 +213,8 @@ public class WaveSystem
             }
             else
             {
-                player.addCoins(10);
+                StarsManager.creditJoueur(player.getPlayerID(), 1, "Mort d'un boss");
+                player.addCoins(5);
                 player.addXP(100);
             }
         }
@@ -241,6 +228,21 @@ public class WaveSystem
             this.endWaveTimer = new EndWaveTimer(this.arena, 15L);
         }
         this.endWaveTimer.start();
+    }
+    
+    public void endCallback()
+    {
+        if(this.arena.getWave() != null)
+        {
+            for(BonusChest chestLocation : this.arena.getWave().getWaveArea().getBonusChestSpawns())
+            {
+                Block block = this.arena.getWorld().getBlockAt(chestLocation.getLocation());
+                Chest chest = (Chest) block.getState();
+                Inventory chestInv = chest.getBlockInventory();
+                chestInv.clear();
+                block.setType(Material.AIR);
+            }
+        }
     }
     
     public boolean isFinished()

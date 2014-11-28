@@ -15,7 +15,7 @@ public class RCEntityExplodeEvent implements Listener
         List<Block> blocks = event.blockList();
         event.blockList().removeAll(blocks);
         
-        if(event.getEntity().hasMetadata("RC-ARENA"))
+        if(event.getEntity().hasMetadata("RC-MOBUUID"))
         {
             RogueCraft.getPlugin().getArena().getWave().monsterKilled();
         }

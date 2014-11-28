@@ -46,6 +46,10 @@
             <id>zyuiop-repo</id>
             <url>http://repo.zyuiop.net/</url>
         </repository>
+        <repository>
+            <id>confuser-repo</id>
+            <url>http://ci.frostcast.net/plugin/repository/everything</url>
+	</repository>
     </repositories>
     <dependencies>
         <dependency>
@@ -92,5 +96,11 @@
             <version>18.0</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>me.confuser</groupId>
+            <artifactId>BarAPI</artifactId>
+            <version>3.0</version>
+            <scope>provided</scope>
+	</dependency>
     </dependencies>
 </project>
