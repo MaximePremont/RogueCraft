@@ -11,7 +11,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 import net.samagames.gameapi.GameAPI;
+import net.samagames.gameapi.GameUtils;
 import net.samagames.gameapi.json.Status;
+import net.samagames.gameapi.themachine.StaticMessages;
 import net.samagames.gameapi.types.GameArena;
 import net.zyuiop.MasterBundle.FastJedis;
 import net.zyuiop.statsapi.StatsApi;
@@ -76,11 +78,11 @@ public class Arena implements GameArena
         Player player = Bukkit.getPlayer(playerID);
         ArenaPlayer aPlayer = new ArenaPlayer(this, player);
 
-        player.sendMessage(Messages.joinArena);
+        player.sendMessage(StaticMessages.JOINARENA.get(this));
         player.teleport(new Location(this.world, 0, 70, 0));
         this.arenaPlayers.add(aPlayer);
 
-        this.broadcastMessage(Messages.playerJoinedArena.replace("${PSEUDO}", player.getName()).replace("${JOUEURS}", "" + this.arenaPlayers.size()).replace("${JOUEURS_MAX}", "" + this.maxPlayers));
+        GameAPI.coherenceMachine.getMessageManager().writePlayerJoinArenaMessage(player, this);
 
         refreshPlayers(true);
         setupPlayer(player);
@@ -114,37 +116,12 @@ public class Arena implements GameArena
         }
 
         player.getInventory().clear();
-        player.getInventory().setItem(8, RogueCraft.getPlugin().getLeaveItem());
-        player.sendMessage(ChatColor.GOLD + "\nBienvenue sur " + ChatColor.RED + "RogueCraft" + ChatColor.GOLD + " !");
+        player.getInventory().setItem(8, GameAPI.coherenceMachine.getLeaveItem());
+        GameAPI.coherenceMachine.getMessageManager().writeWelcomeInGameMessage(player, "RogueCraft");
 
         GameAPI.getManager().refreshArena(this);
     }
-    
-    public void broadcastMessage(String message)
-    {
-        for(ArenaPlayer player : this.arenaPlayers)
-        {
-            if(Bukkit.getPlayer(player.getPlayerID()) != null)
-                player.getPlayer().getPlayer().sendMessage(message);
-        }
-    }
-    
-    public void broadcastSound(Sound s)
-    {
-        for(ArenaPlayer player : this.arenaPlayers)
-        {
-            player.getPlayer().getPlayer().playSound(player.getPlayer().getPlayer().getLocation(), s, 1, 1);
-        }
-    }
-    
-    public void broadcastSound(Sound s, Location l)
-    {
-        for(ArenaPlayer player : this.arenaPlayers)
-        {
-            player.getPlayer().getPlayer().playSound(l, s, 1, 1);
-        }
-    }
-    
+
     public void refreshPlayers(boolean addPlayers)
     {        
         if(isGameStarted())
@@ -155,7 +132,7 @@ public class Arena implements GameArena
         
         if(timer != null && this.arenaPlayers.size() < this.minPlayers)
         {
-            broadcastMessage(Messages.notEnougthPlayers);
+            GameUtils.broadcastMessage(StaticMessages.NOTENOUGTHPLAYERS.get(this));
             timer.setTimeout(0);
             timer.end();
             timer = null;
@@ -209,7 +186,7 @@ public class Arena implements GameArena
             this.setupPlayer(p);
             
             p.setFireTicks(0);
-            p.sendMessage(Messages.gameStart);
+            p.sendMessage(StaticMessages.GAMESTART.get(this));
             
             player.giveStuff();
             
@@ -227,8 +204,8 @@ public class Arena implements GameArena
         this.timer = null;
         GameAPI.getManager().refreshArena(this);
                 
-        broadcastMessage(ChatColor.GOLD + "" + ChatColor.BOLD + "[CONSEIL] Ce jeu doit se jouer en coopération avec les autres joueurs.");
-        broadcastMessage(ChatColor.GOLD + "" + ChatColor.BOLD + "[CONSEIL] Nous pouvons que vous conseillez de vous réunir en vocal, sur le TeamSpeak de SamaGames par exemple ;)");
+        GameUtils.broadcastMessage(ChatColor.GOLD + "" + ChatColor.BOLD + "[CONSEIL] Ce jeu doit se jouer en coopération avec les autres joueurs.");
+        GameUtils.broadcastMessage(ChatColor.GOLD + "" + ChatColor.BOLD + "[CONSEIL] Nous pouvons que vous conseillez de vous réunir en vocal, sur le TeamSpeak de SamaGames par exemple ;)");
         
         this.waveCount = 0;
         this.waveSystem.next();
@@ -241,7 +218,7 @@ public class Arena implements GameArena
         
         for(ArenaPlayer player : this.arenaPlayers)
         {
-            RogueCraft.getPlugin().kickPlayer(player.getPlayer().getPlayer());
+            GameAPI.kickPlayer(player.getPlayer().getPlayer());
         }
         
         this.arenaPlayers.clear();
@@ -249,13 +226,8 @@ public class Arena implements GameArena
     
     public void finish()
     {                
-        broadcastMessage(ChatColor.GOLD + "===========================================");
-        broadcastMessage(" ");
-        broadcastMessage(Messages.tryAgainLater);
-        broadcastMessage(" ");
-        broadcastMessage(ChatColor.GOLD + "===========================================");
-        
-        broadcastSound(Sound.WITHER_DEATH);
+        GameAPI.coherenceMachine.getMessageManager().writeSimpleEndMessage(Messages.tryAgainLater);
+        GameUtils.broadcastSound(Sound.WITHER_DEATH);
                 
         Bukkit.getScheduler().runTaskLater(RogueCraft.getPlugin(), new Runnable()
         {
@@ -285,18 +257,18 @@ public class Arena implements GameArena
         
         if(this.getActualPlayers() != 0)
         {
-            broadcastMessage(Messages.eliminatedPlayer.replace("${PSEUDO}", player.getName()).replace("${REMAINPLAYERS}", Integer.toString(this.getActualPlayers())));
+            GameUtils.broadcastMessage(Messages.eliminatedPlayer.replace("${PSEUDO}", player.getName()).replace("${REMAINPLAYERS}", Integer.toString(this.getActualPlayers())));
         }
         else
         {
-            broadcastMessage(Messages.lastEliminatedPlayer.replace("${PSEUDO}", player.getName()));
+            GameUtils.broadcastMessage(Messages.lastEliminatedPlayer.replace("${PSEUDO}", player.getName()));
             this.finish();
         }
     }
     
     public void loseRespawn(Player player)
     {
-        player.getInventory().setItem(8, RogueCraft.getPlugin().getLeaveItem());
+        player.getInventory().setItem(8, GameAPI.coherenceMachine.getLeaveItem());
         loseHider(player);
         player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 1));
         player.teleport(this.getWave().getWaveArea().getPlayersSpawn());
@@ -506,6 +478,12 @@ public class Arena implements GameArena
     {
         return this.arenaID;
     }
+    
+    @Override
+    public String getGameTag()
+    {
+        return GameAPI.coherenceMachine.getGameTag("RogueCraft");
+    }
 
     @Override
     public boolean hasPlayer(UUID uuid)
@@ -526,7 +504,7 @@ public class Arena implements GameArena
     
     public boolean isGameStarted()
     {
-        return (status == Status.InGame);
+        return (this.status == Status.InGame);
     }
 
     @Override

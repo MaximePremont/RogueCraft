@@ -6,8 +6,6 @@ import fr.blueslime.roguecraft.monsters.BasicMonster;
 import java.util.UUID;
 import me.confuser.barapi.BarAPI;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -15,9 +13,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 
 public class RCEntityDamageByEntityEvent implements Listener
 {
@@ -77,53 +72,9 @@ public class RCEntityDamageByEntityEvent implements Listener
                     Arena arena = RogueCraft.getPlugin().getArena();
                     Player damager = (Player) event.getDamager();
                     
-                    if(arena.hasPlayer(damager.getUniqueId()))
+                    if(!arena.hasPlayer(damager.getUniqueId()))
                     {                        
-                        if(damager.getItemInHand() != null)
-                        {
-                            ItemStack stack = damager.getItemInHand();
-
-                            if(stack.getType() == Material.IRON_SWORD)
-                            {
-                                if(stack.getItemMeta() != null && stack.getItemMeta().getDisplayName() != null)
-                                {
-                                    String lore = ChatColor.stripColor(stack.getItemMeta().getDisplayName());
-
-                                    switch (lore)
-                                    {
-                                        case "Epée empoisonnée":
-                                            damaged.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 120, 1));
-                                            break;
-
-                                        case "Epée de glace":
-                                            damaged.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 120, 1));
-                                            break;
-                                    }
-                                }
-                            }
-                            else if(stack.getType() == Material.BOW)
-                            {
-                                if(stack.getItemMeta() != null && stack.getItemMeta().getDisplayName() != null)
-                                {
-                                    String lore = ChatColor.stripColor(stack.getItemMeta().getDisplayName());
-
-                                    switch (lore)
-                                    {
-                                        case "Arc empoisonné":
-                                            damaged.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 120, 1));
-                                            break;
-
-                                        case "Arc de glace":
-                                            damaged.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 120, 1));
-                                            break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                       event.setCancelled(true);
+                        event.setCancelled(true);
                     }
                 }
                 else if(event.getDamager().getType() == EntityType.CREEPER)

@@ -15,14 +15,12 @@ public class BasicMonster implements Cloneable
 {
     protected final UUID uuid;
     protected final EntityType typeOfMob;
-    private final double baseHealth;
     private ItemStack armorHelmet, armorChestplate, armorLeggings, armorBoots;
     private ItemStack weapon;
         
     public BasicMonster(EntityType typeOfMob)
     {
         this.uuid = UUID.randomUUID();
-        this.baseHealth = 20.0D;
         this.typeOfMob = typeOfMob;
     }
     
@@ -114,19 +112,14 @@ public class BasicMonster implements Cloneable
         return this.typeOfMob;
     }
     
-    public double getBaseHealth()
-    {
-        return this.baseHealth;
-    }
-    
     public double getCalculatedHealth(int waveCount)
     {
-        return this.baseHealth + (0.2 * waveCount);
+        return 20.0D + (0.05 * waveCount);
     }
 
     public double getCalculatedDamage(double baseDamage, int waveCount)
     {
-        return baseDamage + (0.5 / waveCount);
+        return baseDamage + (0.025 * waveCount);
     }
     
     @Override

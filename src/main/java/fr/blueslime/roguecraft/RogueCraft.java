@@ -5,18 +5,10 @@ import fr.blueslime.roguecraft.arena.ArenasManager;
 import fr.blueslime.roguecraft.commands.CommandRogueCraft;
 import fr.blueslime.roguecraft.events.*;
 import fr.blueslime.roguecraft.stuff.StuffManager;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.IOException;
 import net.samagames.gameapi.GameAPI;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class RogueCraft extends JavaPlugin
@@ -93,40 +85,6 @@ public class RogueCraft extends JavaPlugin
         Bukkit.getPluginManager().registerEvents(new RCProjectileHitEvent(), this);
     }
 
-    public void kickPlayer(final Player player)
-    {
-        ByteArrayOutputStream b = new ByteArrayOutputStream();
-        DataOutputStream out = new DataOutputStream(b);
-
-        try
-        {
-            out.writeUTF("Connect");
-            out.writeUTF("lobby");
-        }
-        catch (IOException ex) {}
-        
-        player.sendPluginMessage(this, "BungeeCord", b.toByteArray());
-        
-        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                player.kickPlayer("Une erreur s'est produite lors de la tentative de kick.");
-            }
-        }, 3*20L);
-    }
-
-    public ItemStack getLeaveItem()
-    {
-        ItemStack leave = new ItemStack(Material.WOOD_DOOR, 1);
-        ItemMeta leavemeta = leave.getItemMeta();
-        leavemeta.setDisplayName(ChatColor.GOLD + "Quitter le jeu");
-        leave.setItemMeta(leavemeta);
-        
-        return leave;
-    }
-    
     public Arena getArena()
     {
         return this.arena;

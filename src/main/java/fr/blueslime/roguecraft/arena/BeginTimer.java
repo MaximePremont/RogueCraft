@@ -1,31 +1,31 @@
 package fr.blueslime.roguecraft.arena;
 
-import fr.blueslime.roguecraft.Messages;
 import fr.blueslime.roguecraft.RogueCraft;
+import net.samagames.gameapi.GameAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 
 public class BeginTimer extends Thread
 {
-    private Arena parent;
-    private long time;
-    private boolean count = false;
+    private final Arena parent;
+    private final boolean count = false;
+    private int time;
     private boolean cont = true;
 
     public BeginTimer(Arena parent)
     {
         this.parent = parent;
-        time = 30; // 30 secondes
+        this.time = 30;
     }
 
     public void end()
     {
-        cont = false;
+        this.cont = false;
     }
 
     public void run()
     {
-        while (cont)
+        while (this.cont)
         {
             try
             {
@@ -74,46 +74,7 @@ public class BeginTimer extends Thread
 
     public void formatTime()
     {
-        int hours = (int) time / 3600;
-        int remainder = (int) time - hours * 3600;
-        int mins = remainder / 60;
-        remainder = remainder - mins * 60;
-        int secs = remainder;
-        String time = null;
-        
-        if (hours > 1)
-        {
-            if (secs == 0)
-            {
-                if (mins == 30 || mins == 0)
-                {
-                    time = hours + "h" + mins;
-                }
-            }
-        }
-        else
-        {
-            if ((mins == 45 || mins == 30 || mins == 20 || mins == 10 || mins == 5 || mins == 3 || mins == 2 || mins == 1) && secs == 0)
-            {
-                time = mins + " minutes";
-            }
-            
-            if (mins == 1 && secs == 30)
-            {
-                time = mins + " minutes et " + secs + " secondes";
-            }
-            
-            if (mins == 0)
-            {
-                if (secs == 30 || secs == 20 || secs == 10 || (secs <= 5 && secs > 0))
-                {
-                    time = secs + " secondes";
-                }
-            }
-        }
-        if (time != null) {
-            parent.broadcastMessage(Messages.startIn.replace("${TIME}", time));
-        }
+        GameAPI.coherenceMachine.getMessageManager().writeStartGameCountdownMessage(this.time);
     }
 
     public void setTimeout(int seconds)

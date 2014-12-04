@@ -2,15 +2,14 @@ package fr.blueslime.roguecraft.arena;
 
 import fr.blueslime.roguecraft.RogueCraft;
 import static java.lang.Thread.sleep;
-import net.samagames.network.client.GamePlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 
 public class EndWaveTimer extends Thread
 {
-    private Arena parent;
+    private final Arena parent;
+    private final boolean count = false;
     private long time;
-    private boolean count = false;
     private boolean cont = true;
 
     public EndWaveTimer(Arena parent, long time)

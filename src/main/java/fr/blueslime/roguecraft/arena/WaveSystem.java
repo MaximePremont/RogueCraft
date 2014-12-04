@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+import net.samagames.gameapi.GameUtils;
 import net.zyuiop.MasterBundle.StarsManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -53,7 +54,7 @@ public class WaveSystem
         }
         
         Bukkit.getLogger().info("[RogueCraft-WaveSystem] Selecting random area...");
-        this.arena.broadcastMessage(Messages.preparingArea);
+        GameUtils.broadcastMessage(Messages.preparingArea);
         
         WaveType waveType = WaveType.NORMAL;
         
@@ -74,7 +75,12 @@ public class WaveSystem
         
         if(waveType == WaveType.NORMAL)
         {
-            int mobsCount = (arena.getWaveCount() + (rand.nextInt(3) + 1)) * (arena.getActualPlayers() / (int) 2.42);
+            boolean multiply = (this.arena.getActualPlayers() != 1);
+            int mobsCount = this.arena.getWaveCount() + (rand.nextInt(3) + 1);
+            
+            if(multiply)
+                mobsCount *= this.arena.getActualPlayers();
+            
             ArrayList<BasicMonster> monsters = this.arena.getLogicRandomizer().prepareMobs(this.arena, mobsCount);
 
             for(BasicMonster monster : monsters)
@@ -109,7 +115,7 @@ public class WaveSystem
         this.waveTimer = new WaveTimer(this.arena);
         this.waveTimer.start();
         
-        this.arena.broadcastMessage(Messages.waveStarting);
+        GameUtils.broadcastMessage(Messages.waveStarting);
         
         Bukkit.getLogger().info("[RogueCraft-WaveSystem] Wave generated, end of work! Time to sleep :D");
     }
@@ -172,12 +178,12 @@ public class WaveSystem
             player.updateScoreboard();
         }
         
-        this.arena.broadcastMessage(Messages.waveStarted);
+        GameUtils.broadcastMessage(Messages.waveStarted);
     }
     
     public void end()
     {
-        this.arena.broadcastMessage(Messages.waveEnded);
+        GameUtils.broadcastMessage(Messages.waveEnded);
         
         Wave wave = this.arena.getWave();
         
@@ -208,24 +214,22 @@ public class WaveSystem
         {            
             if(this.arena.getWave().getWaveType() == WaveType.NORMAL)
             {
-                player.addCoins(2);
-                player.addXP(50);
+                player.addCoins(1);
             }
             else
             {
                 StarsManager.creditJoueur(player.getPlayerID(), 1, "Mort d'un boss");
-                player.addCoins(5);
-                player.addXP(100);
+                player.addCoins(2);
             }
         }
         
         if(this.arena.getWave().getWaveType() == WaveType.NORMAL)
         {
-            this.endWaveTimer = new EndWaveTimer(this.arena, 5L);
+            this.endWaveTimer = new EndWaveTimer(this.arena, 10L);
         }
         else
         {
-            this.endWaveTimer = new EndWaveTimer(this.arena, 15L);
+            this.endWaveTimer = new EndWaveTimer(this.arena, 20L);
         }
         this.endWaveTimer.start();
     }

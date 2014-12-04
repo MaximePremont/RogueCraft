@@ -7,6 +7,7 @@ import fr.blueslime.roguecraft.stuff.PlayerStuff;
 import fr.blueslime.roguecraft.stuff.PlayerStuffDeserializer;
 import fr.blueslime.roguecraft.stuff.StuffManager.PlayerClass;
 import java.util.UUID;
+import net.samagames.gameapi.GameAPI;
 import net.zyuiop.MasterBundle.FastJedis;
 import net.zyuiop.coinsManager.CoinsManager;
 import net.zyuiop.statsapi.StatsApi;
@@ -19,6 +20,7 @@ import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionType;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
 import redis.clients.jedis.ShardedJedis;
 
@@ -35,8 +37,12 @@ public class ArenaPlayer
     private ItemStack weapon;
     private PlayerClass pClass;
     
+    private Score vagueScore;
+    private Score mobsScore;
+    private Score mobsKilledScore;
+    private Score coinsScore;
+    
     private int coins;
-    private int xp;
     private int mobs;
     
     public ArenaPlayer(Arena arena, Player player)
@@ -68,9 +74,7 @@ public class ArenaPlayer
     }
     
     public void giveStuff()
-    {
-        this.arena.broadcastMessage(ChatColor.RED + "[DEBUG] Giving stuff to " + this.player.getName());
-        
+    {        
         this.armor = RogueCraft.getPlugin().getStuffManager().createArmor(this);
         this.weapon = RogueCraft.getPlugin().getStuffManager().createWeapon(this);
         
@@ -80,7 +84,7 @@ public class ArenaPlayer
         
         if(this.pClass == PlayerClass.UNKNOW)
         {
-            RogueCraft.getPlugin().kickPlayer(p);
+            GameAPI.kickPlayer(p);
         }
         
         p.getInventory().setHelmet(this.armor[0]);
@@ -150,13 +154,6 @@ public class ArenaPlayer
         updateScoreboard();
     }
     
-    public void addXP(int xp)
-    {
-        StatsApi.increaseStat(this.player.getUniqueId(), "roguecraft", "xp", xp);
-        this.xp += xp;
-        updateScoreboard();
-    }
-    
     public void increaseKilledMobsCount()
     {
         this.mobs++;
@@ -174,7 +171,6 @@ public class ArenaPlayer
         this.bar.getScore(Bukkit.getOfflinePlayer(ChatColor.GOLD + "Vague:")).setScore(this.arena.getWaveCount());
         this.bar.getScore(Bukkit.getOfflinePlayer(ChatColor.GOLD + "Mobs:")).setScore(this.arena.getWave().getMonstersLeft());
         this.bar.getScore(Bukkit.getOfflinePlayer(ChatColor.GOLD + "Coins:")).setScore(this.coins);
-        this.bar.getScore(Bukkit.getOfflinePlayer(ChatColor.GOLD + "XP:")).setScore(this.xp);
         this.bar.getScore(Bukkit.getOfflinePlayer(ChatColor.GOLD + "Mobs tués:")).setScore(this.mobs);
     }
 

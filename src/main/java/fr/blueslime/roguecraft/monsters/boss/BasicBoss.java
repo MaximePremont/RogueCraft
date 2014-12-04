@@ -4,11 +4,12 @@ import fr.blueslime.roguecraft.monsters.boss.attacks.Attack;
 import fr.blueslime.roguecraft.RogueCraft;
 import fr.blueslime.roguecraft.arena.Arena;
 import fr.blueslime.roguecraft.monsters.BasicMonster;
-import fr.blueslime.roguecraft.utils.ColorUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 import me.confuser.barapi.BarAPI;
+import net.samagames.gameapi.GameUtils;
+import net.samagames.utils.ColorUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
@@ -29,13 +30,16 @@ public class BasicBoss extends BasicMonster
 {
     public final ArrayList<Attack> attacks;
     private String displayName;
+    private String userHead;
     private int exploadingID;
+    private int secondAttackID;
     private boolean canDoSecondAttack;
     
     public BasicBoss(EntityType typeOfMob)
     {
         super(typeOfMob);
         this.displayName = "";
+        this.userHead = "";
         this.attacks = new ArrayList<>();
         this.canDoSecondAttack = true;
     }
@@ -59,12 +63,12 @@ public class BasicBoss extends BasicMonster
         ee.setItemInHand(this.getAtttackWeapon());
         
         location.getWorld().strikeLightningEffect(location);
-        arena.broadcastSound(Sound.EXPLODE);
+        GameUtils.broadcastSound(Sound.EXPLODE);
         
         for(Player player : Bukkit.getOnlinePlayers())
-            BarAPI.setMessage(player, this.displayName, 100.0F);
+            BarAPI.setMessage(player, ChatColor.GOLD + "" + ChatColor.BOLD + this.displayName, 100.0F);
         
-        Bukkit.getScheduler().scheduleSyncRepeatingTask(RogueCraft.getPlugin(), new Runnable()
+        this.secondAttackID = Bukkit.getScheduler().scheduleSyncRepeatingTask(RogueCraft.getPlugin(), new Runnable()
         {
             @Override
             public void run()
@@ -99,6 +103,8 @@ public class BasicBoss extends BasicMonster
     @Override
     public void onDeath(final Location location)
     {        
+        Bukkit.getScheduler().cancelTask(this.secondAttackID);
+        
         this.exploadingID = Bukkit.getScheduler().scheduleSyncRepeatingTask(RogueCraft.getPlugin(), new Runnable()
         {
             int compteur = 0;
@@ -148,18 +154,34 @@ public class BasicBoss extends BasicMonster
         Bukkit.getScheduler().cancelTask(this.exploadingID);
     }
     
+    public void setCustomName(String displayName)
+    {
+        this.displayName = displayName;
+    }
+    
+    public void setCustomHead(String userHead)
+    {
+        this.userHead = userHead;
+    }
+    
+    @Override
     public double getCalculatedHealth(int waveCount)
     {
-        return 150.0D + (0.5 * waveCount);
+        return 150.0D + (0.05 * waveCount);
     }
     
     public double getCalculatedDamage(int waveCount)
     {
-        return 5.0D + (1.6 / waveCount);
+        return 5.0D + (0.05 * waveCount);
     }
     
-    public void setCustomName(String displayName)
+    public String getCustomHead()
     {
-        this.displayName = displayName;
+        return this.userHead;
+    }
+    
+    public boolean hasCustomHead()
+    {
+        return !this.userHead.equals("");
     }
 }

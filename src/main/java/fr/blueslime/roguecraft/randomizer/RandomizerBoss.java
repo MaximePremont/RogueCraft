@@ -2,6 +2,7 @@ package fr.blueslime.roguecraft.randomizer;
 
 import fr.blueslime.roguecraft.arena.Arena;
 import fr.blueslime.roguecraft.monsters.boss.BasicBoss;
+import fr.blueslime.roguecraft.monsters.boss.BossList;
 import java.util.HashMap;
 import java.util.Random;
 import org.bukkit.Material;
@@ -15,34 +16,15 @@ public class RandomizerBoss
 {
     public BasicBoss randomBoss(Arena arena)
     {
-        EntityType type = this.takeRandomEntityType();
-        BasicBoss boss = new BasicBoss(type);
+        BossList bossType = BossList.randomBoss();
+        BasicBoss boss = bossType.create();
         ItemStack[] armor = this.randomArmor(arena.getWaveCount());
         
-        if(type == EntityType.ZOMBIE)
-        {
-            Random rand = new Random();
-            int so = rand.nextInt(3) + 1;
-            
+        if(boss.hasCustomHead())
+        {            
             ItemStack head = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
             SkullMeta headMeta = (SkullMeta) head.getItemMeta();
-            
-            if(so == 1)
-            {
-                headMeta.setOwner("cece35b");
-                boss.setCustomName("Fantôme de cece35b");
-            }
-            else if(so == 2)
-            {
-                headMeta.setOwner("thog92");
-                boss.setCustomName("Fantôme de thog92");
-            }
-            else
-            {
-                headMeta.setOwner("Aurelien_Sama");
-                boss.setCustomName("Fantôme d'Aurelien_Sama");
-            }
-            
+            headMeta.setOwner(boss.getCustomHead());
             head.setItemMeta(headMeta);
             boss.setArmorHelmet(head);
         }
@@ -57,17 +39,6 @@ public class RandomizerBoss
         boss.setWeapon(this.randomWeapon(arena.getWaveCount()));
         
         return boss;
-    }
-    
-    private EntityType takeRandomEntityType()
-    {
-        Random rand = new Random();
-        int so = rand.nextInt(10) + 1;
-
-        if(so <= 3)
-            return EntityType.ZOMBIE;
-        else
-            return EntityType.WITHER;
     }
     
     public ItemStack randomWeapon(int waveCount)

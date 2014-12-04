@@ -33,17 +33,17 @@ public class StuffManager
         if(stuff.getBow() != null)
         {
             player.setPlayerClass(PlayerClass.ARCHER);
-            return new LocalBow(stuff.getBow()[0], stuff.getBow()[1], stuff.getBow()[2], stuff.getBow()[3]).build();
+            return new LocalBow(stuff.getBow()[0], stuff.getBow()[1], stuff.getBow()[2]).build();
         }
         else if(stuff.getSword() != null)
         {
             player.setPlayerClass(PlayerClass.KNIGHT);
-            return new LocalSword(stuff.getSword()[0], stuff.getSword()[0], stuff.getSword()[0], stuff.getSword()[0]).build();
+            return new LocalSword(stuff.getSword()[0], stuff.getSword()[1], stuff.getSword()[2]).build();
         }
         else if(stuff.getWand() != null)
         {
             player.setPlayerClass(PlayerClass.WIZARD);
-            return new LocalWand(stuff.getWand()[0], stuff.getWand()[1]).build();
+            return new LocalWand(stuff.getWand()[0]).build();
         }
         else
         {

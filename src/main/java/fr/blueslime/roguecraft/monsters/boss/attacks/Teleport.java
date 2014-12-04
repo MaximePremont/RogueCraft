@@ -5,6 +5,7 @@ import fr.blueslime.roguecraft.arena.ArenaPlayer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
+import net.samagames.gameapi.GameUtils;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Monster;
@@ -19,7 +20,6 @@ public class Teleport extends Attack
         launcher.teleport(players.get(0).getPlayer().getLocation());
         ((Monster) launcher).setTarget(players.get(0).getPlayer());
         
-        for(ArenaPlayer player : players)
-            arena.broadcastSound(Sound.ENDERMAN_TELEPORT);
+        GameUtils.broadcastSound(Sound.ENDERMAN_TELEPORT);
     }
 }

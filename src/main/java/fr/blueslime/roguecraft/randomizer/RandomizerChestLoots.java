@@ -25,21 +25,25 @@ public class RandomizerChestLoots
         ItemStack fishingSwag = new ItemStack(Material.FISHING_ROD);
         fishingSwag.addUnsafeEnchantment(Enchantment.FIRE_ASPECT, 1);
         fishingSwag.addUnsafeEnchantment(Enchantment.KNOCKBACK, 3);
-        fishingSwag.getItemMeta().setDisplayName(ChatColor.GOLD + "--[ Canne à Swag ]--");
+        ItemMeta fishingSwagMeta = fishingSwag.getItemMeta();
+        fishingSwagMeta.setDisplayName(ChatColor.GOLD + "--[ Canne à Swag ]--");
+        fishingSwag.setItemMeta(fishingSwagMeta);
         
         ItemStack wool = new ItemStack(Material.WOOL, 1);
         wool.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 5);
-        wool.getItemMeta().setDisplayName(ChatColor.BLUE + "--[ Stainte Laine ]--");
+        ItemMeta woolMeta = wool.getItemMeta();
+        woolMeta.setDisplayName(ChatColor.BLUE + "--[ Stainte Laine ]--");
+        wool.setItemMeta(woolMeta);
         
         this.registerItem(new RandomItem(new ItemStack(Material.WEB), 1, 300));
         this.registerItem(new RandomItem(new ItemStack(Material.FLINT), 1, 300));
-        this.registerItem(new RandomItem(new ItemStack(Material.COOKED_CHICKEN), 1, 450));
-        this.registerItem(new RandomItem(new ItemStack(Material.COOKED_BEEF), 1, 500));
+        this.registerItem(new RandomItem(new ItemStack(Material.COOKED_CHICKEN), 1, 550));
+        this.registerItem(new RandomItem(new ItemStack(Material.COOKED_BEEF), 1, 600));
         this.registerItem(new RandomItem(new ItemStack(Material.RAW_BEEF), 1, 300));
         
         this.registerItem(new RandomItem(new Potion(PotionType.STRENGTH).toItemStack(1), 2, 200));
         this.registerItem(new RandomItem(new Potion(PotionType.REGEN).toItemStack(1), 2, 200));
-        this.registerItem(new RandomItem(new Potion(PotionType.POISON).splash().toItemStack(1), 2, 200));
+        this.registerItem(new RandomItem(new Potion(PotionType.FIRE_RESISTANCE).splash().toItemStack(1), 2, 300));
         this.registerItem(new RandomItem(new Potion(PotionType.NIGHT_VISION).splash().toItemStack(1), 2, 200));
         this.registerItem(new RandomItem(new Potion(PotionType.INSTANT_HEAL, 2).toItemStack(1), 2, 300));
         this.registerItem(new RandomItem(new Potion(PotionType.SPEED).toItemStack(1), 2, 300));

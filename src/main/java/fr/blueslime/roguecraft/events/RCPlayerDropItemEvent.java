@@ -34,6 +34,10 @@ public class RCPlayerDropItemEvent implements Listener
                     event.setCancelled(false);
                 }
             }
+            else
+            {
+                event.setCancelled(true);
+            }
         }
     }
 }
